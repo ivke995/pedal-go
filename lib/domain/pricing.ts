@@ -4,8 +4,8 @@ export type RentalDateInput = Date | string | number;
 
 export type RentalPriceQuote = {
   rentalDays: number;
-  dailyRateBamCents: number;
-  totalBamCents: number;
+  dailyRateUsdCents: number;
+  totalUsdCents: number;
 };
 
 function toDate(input: RentalDateInput): Date {
@@ -24,37 +24,37 @@ export function calculateRentalDays(pickupAt: RentalDateInput, returnAt: RentalD
   return Math.ceil(durationMs / MS_PER_RENTAL_DAY);
 }
 
-export function calculateTotalBamCents(rentalDays: number, dailyRateBamCents: number): number {
+export function calculateTotalUsdCents(rentalDays: number, dailyRateUsdCents: number): number {
   if (!Number.isInteger(rentalDays) || rentalDays <= 0) {
     return 0;
   }
 
-  if (!Number.isInteger(dailyRateBamCents) || dailyRateBamCents <= 0) {
+  if (!Number.isInteger(dailyRateUsdCents) || dailyRateUsdCents <= 0) {
     return 0;
   }
 
-  return rentalDays * dailyRateBamCents;
+  return rentalDays * dailyRateUsdCents;
 }
 
 export function quoteRentalPrice(
   pickupAt: RentalDateInput,
   returnAt: RentalDateInput,
-  dailyRateBamCents: number,
+  dailyRateUsdCents: number,
 ): RentalPriceQuote {
   const rentalDays = calculateRentalDays(pickupAt, returnAt);
 
   return {
     rentalDays,
-    dailyRateBamCents,
-    totalBamCents: calculateTotalBamCents(rentalDays, dailyRateBamCents),
+    dailyRateUsdCents,
+    totalUsdCents: calculateTotalUsdCents(rentalDays, dailyRateUsdCents),
   };
 }
 
-export function formatBamCents(amountBamCents: number): string {
-  return new Intl.NumberFormat("bs-BA", {
+export function formatUsdCents(amountUsdCents: number): string {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "BAM",
+    currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amountBamCents / 100);
+  }).format(amountUsdCents / 100);
 }

@@ -8,7 +8,7 @@ PedalGo is configured for Turso/libSQL with Drizzle ORM.
 - `lib/db/env.ts` — Validates the database environment contract and produces libSQL client config.
 - `lib/db/client.ts` — Exports the server-side Drizzle client.
 - `lib/db/schema.ts` — Drizzle rental domain schema, typed status constants, and relations.
-- `lib/domain/pricing.ts` — Server-side rental-day, BAM-cent total, quote, and BAM formatting helpers.
+- `lib/domain/pricing.ts` — Server-side rental-day, USD-cent total, quote, and USD formatting helpers.
 - `lib/domain/date-ranges.ts` — Shared overlap detection for rental/availability windows.
 - `lib/domain/availability.ts` — Drizzle-backed bike-type availability lookup.
 - `scripts/seed.ts` — Idempotent MVP seed for city-bike inventory and bootstrap admin access.
@@ -17,10 +17,10 @@ PedalGo is configured for Turso/libSQL with Drizzle ORM.
 ## Rental schema
 
 Current tables:
-- `bike_types` — rentable product categories with slug, description, active/sort flags, features JSON, and `daily_rate_bam_cents`.
+- `bike_types` — rentable product categories with slug, description, active/sort flags, features JSON, and `daily_rate_usd_cents`.
 - `bikes` — physical inventory units linked to bike types with unique codes and statuses.
-- `reservations` — customer bookings linked to a bike type and optionally a specific bike, with pickup/return timestamps, rental days, BAM totals, and status.
-- `payments` — payment records linked to reservations with BAM amount, provider identifiers, status, and payment/refund timestamps.
+- `reservations` — customer bookings linked to a bike type and optionally a specific bike, with pickup/return timestamps, rental days, USD totals, and status.
+- `payments` — payment records linked to reservations with USD amount, provider identifiers, status, and payment/refund timestamps.
 - `availability_blocks` — maintenance, reserved-demand, or inactive date ranges scoped to a bike type and/or bike.
 - `admin_users` — admin bootstrap/auth records with unique email, password hash, status, and last-login timestamp.
 
@@ -29,7 +29,7 @@ Schema constraints include foreign keys, indexes for availability/reservation lo
 ## Domain services
 
 - Rental days use the MVP rule that every started 24-hour period counts as one full day; invalid or empty ranges return zero days.
-- Price quotes multiply rental days by `daily_rate_bam_cents` and return BAM minor-unit totals.
+- Price quotes multiply rental days by the supplied daily rate in cents and return USD-cent field names/formatting. Database-backed money fields use USD-cent column/property names.
 - Availability lookup requires an active bike type and available physical bikes.
 - Availability excludes bike-specific confirmed reservation conflicts, unassigned confirmed reservations as capacity consumption, and reserved/maintenance/inactive availability blocks.
 - Type-wide overlapping availability blocks with no `bike_id` make all bikes for the requested type unavailable during the block window.
@@ -47,7 +47,7 @@ Database commands and scripts load `.env.local` and `.env` automatically without
 ## MVP seed data
 
 `pnpm db:seed` creates or updates:
-- One active `PedalGo City Bike` bike type with slug `city-bike` and `daily_rate_bam_cents = 2500`.
+- One active `PedalGo City Bike` bike type with slug `city-bike` and `daily_rate_usd_cents = 2500`.
 - Two available physical bikes: `CITY-001` and `CITY-002`.
 - One active bootstrap admin user with a PBKDF2-SHA256 password hash.
 

@@ -268,8 +268,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "daily_rate_bam_cents": {
-          "name": "daily_rate_bam_cents",
+        "daily_rate_usd_cents": {
+          "name": "daily_rate_usd_cents",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -346,7 +346,7 @@
       "checkConstraints": {
         "bike_types_daily_rate_positive": {
           "name": "bike_types_daily_rate_positive",
-          "value": "\"bike_types\".\"daily_rate_bam_cents\" > 0"
+          "value": "\"bike_types\".\"daily_rate_usd_cents\" > 0"
         }
       }
     },
@@ -471,8 +471,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "amount_bam_cents": {
-          "name": "amount_bam_cents",
+        "amount_usd_cents": {
+          "name": "amount_usd_cents",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -586,7 +586,7 @@
         },
         "payments_amount_positive": {
           "name": "payments_amount_positive",
-          "value": "\"payments\".\"amount_bam_cents\" > 0"
+          "value": "\"payments\".\"amount_usd_cents\" > 0"
         }
       }
     },
@@ -663,15 +663,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "daily_rate_bam_cents": {
-          "name": "daily_rate_bam_cents",
+        "daily_rate_usd_cents": {
+          "name": "daily_rate_usd_cents",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "total_bam_cents": {
-          "name": "total_bam_cents",
+        "total_usd_cents": {
+          "name": "total_usd_cents",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -796,11 +796,11 @@
         },
         "reservations_daily_rate_positive": {
           "name": "reservations_daily_rate_positive",
-          "value": "\"reservations\".\"daily_rate_bam_cents\" > 0"
+          "value": "\"reservations\".\"daily_rate_usd_cents\" > 0"
         },
         "reservations_total_positive": {
           "name": "reservations_total_positive",
-          "value": "\"reservations\".\"total_bam_cents\" > 0"
+          "value": "\"reservations\".\"total_usd_cents\" > 0"
         }
       }
     }

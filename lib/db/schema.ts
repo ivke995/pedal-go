@@ -43,7 +43,7 @@ export const bikeTypes = sqliteTable(
     name: text("name").notNull(),
     slug: text("slug").notNull(),
     description: text("description").notNull(),
-    dailyRateBamCents: integer("daily_rate_bam_cents").notNull(),
+    dailyRateUsdCents: integer("daily_rate_usd_cents").notNull(),
     imagePath: text("image_path"),
     featuresJson: text("features_json", { mode: "json" }).$type<string[]>().notNull().default(sql`'[]'`),
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
@@ -54,7 +54,7 @@ export const bikeTypes = sqliteTable(
   (table) => [
     uniqueIndex("bike_types_slug_unique").on(table.slug),
     index("bike_types_active_sort_idx").on(table.isActive, table.sortOrder),
-    check("bike_types_daily_rate_positive", sql`${table.dailyRateBamCents} > 0`),
+    check("bike_types_daily_rate_positive", sql`${table.dailyRateUsdCents} > 0`),
   ],
 );
 
@@ -94,8 +94,8 @@ export const reservations = sqliteTable(
     pickupAt: integer("pickup_at", { mode: "timestamp_ms" }).notNull(),
     returnAt: integer("return_at", { mode: "timestamp_ms" }).notNull(),
     rentalDays: integer("rental_days").notNull(),
-    dailyRateBamCents: integer("daily_rate_bam_cents").notNull(),
-    totalBamCents: integer("total_bam_cents").notNull(),
+    dailyRateUsdCents: integer("daily_rate_usd_cents").notNull(),
+    totalUsdCents: integer("total_usd_cents").notNull(),
     status: text("status", { enum: RESERVATION_STATUSES }).notNull().default("pending"),
     notes: text("notes"),
     createdAt: timestampMs("created_at"),
@@ -110,8 +110,8 @@ export const reservations = sqliteTable(
     check("reservations_status_check", statusCheck("status", RESERVATION_STATUSES)),
     check("reservations_date_order_check", sql`${table.returnAt} > ${table.pickupAt}`),
     check("reservations_rental_days_positive", sql`${table.rentalDays} > 0`),
-    check("reservations_daily_rate_positive", sql`${table.dailyRateBamCents} > 0`),
-    check("reservations_total_positive", sql`${table.totalBamCents} > 0`),
+    check("reservations_daily_rate_positive", sql`${table.dailyRateUsdCents} > 0`),
+    check("reservations_total_positive", sql`${table.totalUsdCents} > 0`),
   ],
 );
 
@@ -122,7 +122,7 @@ export const payments = sqliteTable(
     reservationId: text("reservation_id")
       .notNull()
       .references(() => reservations.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    amountBamCents: integer("amount_bam_cents").notNull(),
+    amountUsdCents: integer("amount_usd_cents").notNull(),
     status: text("status", { enum: PAYMENT_STATUSES }).notNull().default("pending"),
     provider: text("provider"),
     providerPaymentId: text("provider_payment_id"),
@@ -137,7 +137,7 @@ export const payments = sqliteTable(
     index("payments_status_idx").on(table.status),
     uniqueIndex("payments_provider_payment_unique").on(table.provider, table.providerPaymentId),
     check("payments_status_check", statusCheck("status", PAYMENT_STATUSES)),
-    check("payments_amount_positive", sql`${table.amountBamCents} > 0`),
+    check("payments_amount_positive", sql`${table.amountUsdCents} > 0`),
   ],
 );
 

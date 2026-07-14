@@ -25,10 +25,10 @@ Use this file first to find relevant durable context before changing code.
 - `components/booking/` — Booking flow components.
 - `components/ui/` — Shared UI primitives.
 - `lib/types.ts` — Shared domain types.
-- `lib/pricing.ts` — Pricing and formatting helpers.
+- `lib/pricing.ts` — Current UI USD pricing and formatting helpers.
 - `lib/mock-data.ts` — Mock inventory, reservations, availability, and metrics data.
 - `lib/db/` — Database env validation, Turso/libSQL client, and Drizzle rental schema.
-- `lib/domain/` — Server-side BAM pricing and availability services for database-backed rental flows.
+- `lib/domain/` — Server-side USD pricing and availability services for database-backed rental flows.
 - `scripts/seed.ts` — MVP city-bike inventory and bootstrap admin seed workflow.
 - `tests/domain/` — Unit tests for server-side pricing, date-range, and availability domain services.
 - `drizzle.config.ts` — Drizzle Kit migration configuration.

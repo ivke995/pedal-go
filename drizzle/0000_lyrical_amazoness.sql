@@ -37,14 +37,14 @@ CREATE TABLE `bike_types` (
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
 	`description` text NOT NULL,
-	`daily_rate_bam_cents` integer NOT NULL,
+	`daily_rate_usd_cents` integer NOT NULL,
 	`image_path` text,
 	`features_json` text DEFAULT '[]' NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
 	`sort_order` integer DEFAULT 0 NOT NULL,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
-	CONSTRAINT "bike_types_daily_rate_positive" CHECK("bike_types"."daily_rate_bam_cents" > 0)
+	CONSTRAINT "bike_types_daily_rate_positive" CHECK("bike_types"."daily_rate_usd_cents" > 0)
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `bike_types_slug_unique` ON `bike_types` (`slug`);--> statement-breakpoint
@@ -67,7 +67,7 @@ CREATE INDEX `bikes_type_status_idx` ON `bikes` (`bike_type_id`,`status`);--> st
 CREATE TABLE `payments` (
 	`id` text PRIMARY KEY NOT NULL,
 	`reservation_id` text NOT NULL,
-	`amount_bam_cents` integer NOT NULL,
+	`amount_usd_cents` integer NOT NULL,
 	`status` text DEFAULT 'pending' NOT NULL,
 	`provider` text,
 	`provider_payment_id` text,
@@ -78,7 +78,7 @@ CREATE TABLE `payments` (
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`reservation_id`) REFERENCES `reservations`(`id`) ON UPDATE cascade ON DELETE cascade,
 	CONSTRAINT "payments_status_check" CHECK(status in ('pending', 'confirmed', 'failed', 'refunded')),
-	CONSTRAINT "payments_amount_positive" CHECK("payments"."amount_bam_cents" > 0)
+	CONSTRAINT "payments_amount_positive" CHECK("payments"."amount_usd_cents" > 0)
 );
 --> statement-breakpoint
 CREATE INDEX `payments_reservation_idx` ON `payments` (`reservation_id`);--> statement-breakpoint
@@ -95,8 +95,8 @@ CREATE TABLE `reservations` (
 	`pickup_at` integer NOT NULL,
 	`return_at` integer NOT NULL,
 	`rental_days` integer NOT NULL,
-	`daily_rate_bam_cents` integer NOT NULL,
-	`total_bam_cents` integer NOT NULL,
+	`daily_rate_usd_cents` integer NOT NULL,
+	`total_usd_cents` integer NOT NULL,
 	`status` text DEFAULT 'pending' NOT NULL,
 	`notes` text,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
@@ -106,8 +106,8 @@ CREATE TABLE `reservations` (
 	CONSTRAINT "reservations_status_check" CHECK(status in ('pending', 'confirmed', 'cancelled', 'completed', 'failed', 'refunded')),
 	CONSTRAINT "reservations_date_order_check" CHECK("reservations"."return_at" > "reservations"."pickup_at"),
 	CONSTRAINT "reservations_rental_days_positive" CHECK("reservations"."rental_days" > 0),
-	CONSTRAINT "reservations_daily_rate_positive" CHECK("reservations"."daily_rate_bam_cents" > 0),
-	CONSTRAINT "reservations_total_positive" CHECK("reservations"."total_bam_cents" > 0)
+	CONSTRAINT "reservations_daily_rate_positive" CHECK("reservations"."daily_rate_usd_cents" > 0),
+	CONSTRAINT "reservations_total_positive" CHECK("reservations"."total_usd_cents" > 0)
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `reservations_reference_unique` ON `reservations` (`reference`);--> statement-breakpoint

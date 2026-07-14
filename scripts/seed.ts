@@ -10,7 +10,7 @@ const MVP_BIKE_TYPE = {
   name: "PedalGo City Bike",
   slug: "city-bike",
   description: "Comfortable all-purpose city bike for PedalGo MVP rentals.",
-  dailyRateBamCents: 2500,
+  dailyRateUsdCents: 2500,
   imagePath: "/bikes/city-bike.jpg",
   featuresJson: ["Step-through frame", "Front basket", "Integrated lights", "Helmet included"] as string[],
   isActive: true,
@@ -66,7 +66,7 @@ async function seed() {
         name: MVP_BIKE_TYPE.name,
         slug: MVP_BIKE_TYPE.slug,
         description: MVP_BIKE_TYPE.description,
-        dailyRateBamCents: MVP_BIKE_TYPE.dailyRateBamCents,
+        dailyRateUsdCents: MVP_BIKE_TYPE.dailyRateUsdCents,
         imagePath: MVP_BIKE_TYPE.imagePath,
         featuresJson: MVP_BIKE_TYPE.featuresJson,
         isActive: MVP_BIKE_TYPE.isActive,
@@ -116,7 +116,7 @@ async function seed() {
   const [seededAdmin] = await db.select().from(adminUsers).where(eq(adminUsers.id, "admin-bootstrap"));
 
   console.info("Seed complete:");
-  console.info(`- Bike type: ${seededBikeType?.name} (${seededBikeType?.dailyRateBamCents} BAM cents/day)`);
+  console.info(`- Bike type: ${seededBikeType?.name} (${seededBikeType?.dailyRateUsdCents} USD cents/day)`);
   console.info(`- Bikes: ${seededBikes.map((bike) => bike.code).join(", ")}`);
   console.info(`- Admin user: ${seededAdmin?.email} (${seededAdmin?.status})`);
 }

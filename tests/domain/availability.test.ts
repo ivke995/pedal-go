@@ -25,7 +25,7 @@ const bikeType = {
   name: "City Bike",
   slug: "city-bike",
   description: "Comfort rental bike",
-  dailyRateBamCents: 2500,
+  dailyRateUsdCents: 2500,
   imagePath: null,
   featuresJson: [],
   isActive: true,

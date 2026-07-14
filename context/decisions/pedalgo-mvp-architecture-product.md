@@ -25,7 +25,7 @@ PedalGo MVP is a web application for online bicycle rentals with a customer-firs
 - The UI and data model should support future multiple bike types without redesign.
 - Pricing formula: `total price = rental days × daily rate`.
 - Every started 24-hour period counts as one rental day.
-- MVP currency is BAM.
+- MVP currency is USD.
 
 ## Data platform
 

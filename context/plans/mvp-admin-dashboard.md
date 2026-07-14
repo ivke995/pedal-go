@@ -58,7 +58,7 @@ Implement the authenticated administrator experience for PedalGo MVP: `/admin/lo
 
 - [ ] T06: `Implement pricing management` (status:todo)
   - Task ID: T06
-  - Goal: Allow admins to update the featured rental daily price in BAM while preserving future bike-type extensibility.
+  - Goal: Allow admins to update the featured rental daily price in USD while preserving future bike-type extensibility.
   - Boundaries (in/out of scope): In - edit daily price for active bike type, validation, audit-friendly updated timestamps. Out - hourly/weekend/seasonal pricing, discounts, coupon codes.
   - Done when: Updated pricing affects new availability/booking calculations and does not mutate historical paid reservation totals.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; update price and confirm new booking quote changes while existing reservation total remains unchanged.

@@ -8,7 +8,7 @@ Implement the customer-facing PedalGo MVP booking flow: availability search, ren
 
 - Homepage focuses immediately on booking with headline `Rent a Bike in Just a Few Clicks` and pickup/return date-time fields.
 - Customer flow requires no account, registration, login, or password.
-- Customers can check availability, see total BAM price, enter full name/email/phone, and proceed to Stripe Checkout.
+- Customers can check availability, see total USD price, enter full name/email/phone, and proceed to Stripe Checkout.
 - Reservations are created as `PENDING_PAYMENT` before checkout and become `CONFIRMED` only from a successful Stripe webhook.
 - Reaching the success page never finalizes the reservation by itself.
 - Confirmation email is sent after webhook-confirmed payment and includes reservation number, pickup/return times, total paid, pickup location, contact information, and pickup instructions.
@@ -34,7 +34,7 @@ Implement the customer-facing PedalGo MVP booking flow: availability search, ren
   - Task ID: T02
   - Goal: Connect pickup/return date-time input to database-backed availability and pricing results for the featured rental option.
   - Boundaries (in/out of scope): In - availability input validation, date ordering validation, rental-day/price response, unavailable-state response. Out - checkout creation and email sending.
-  - Done when: Valid date ranges return availability and total BAM price; invalid ranges return clear errors; unavailable ranges cannot proceed to payment.
+  - Done when: Valid date ranges return availability and total USD price; invalid ranges return clear errors; unavailable ranges cannot proceed to payment.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; manually test available, unavailable, and invalid date ranges.
 
 - [ ] T03: `Capture customer details and create pending reservation` (status:todo)
@@ -48,7 +48,7 @@ Implement the customer-facing PedalGo MVP booking flow: availability search, ren
   - Task ID: T04
   - Goal: Create a Stripe Checkout session for a pending reservation and redirect the customer to hosted payment.
   - Boundaries (in/out of scope): In - Stripe SDK/config, checkout route/server action, success/cancel URLs, metadata linking to reservation/payment. Out - webhook finalization and email sending.
-  - Done when: Pending reservations can produce Stripe Checkout sessions with correct BAM amount and metadata; customer is redirected to Stripe Checkout.
+  - Done when: Pending reservations can produce Stripe Checkout sessions with correct USD amount and metadata; customer is redirected to Stripe Checkout.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; run Stripe test-mode checkout manually with test keys.
 
 - [ ] T05: `Finalize reservation from Stripe webhook` (status:todo)

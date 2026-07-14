@@ -26,12 +26,12 @@ The user-facing app still reads mock rental inventory, reservations, availabilit
 The database foundation is configured but not yet integrated into feature behavior:
 - Drizzle Kit reads rental tables from `lib/db/schema.ts` and writes migrations to `drizzle/`.
 - `lib/db/client.ts` exports the server-side Drizzle client backed by `@libsql/client`.
-- `lib/domain/pricing.ts` quotes rental prices in BAM minor units and rounds every started 24-hour period up to one rental day.
+- `lib/domain/pricing.ts` quotes rental prices with USD-cent field names/formatting and rounds every started 24-hour period up to one rental day.
 - `lib/domain/availability.ts` looks up active bike-type inventory and excludes unavailable bikes, confirmed reservation conflicts, unassigned confirmed reservation capacity, and reserved/maintenance/inactive availability blocks.
 - `TURSO_DATABASE_URL` is required. `TURSO_AUTH_TOKEN` is required for remote Turso/libSQL URLs and omitted for local `file:` URLs. Database commands load `.env.local` and `.env` automatically.
 - `pnpm db:seed` creates the MVP `PedalGo City Bike` bike type, `CITY-001`/`CITY-002` physical bikes, and a bootstrap admin user. It requires `ADMIN_BOOTSTRAP_PASSWORD` and defaults admin email/name when not supplied.
-- The current schema includes `bike_types`, `bikes`, `reservations`, `payments`, `availability_blocks`, and `admin_users` with foreign keys, indexes, timestamp fields, and status check constraints.
-- Database rental prices use BAM minor units (`*_bam_cents`). The UI still displays mock USD prices until later migration tasks replace the frontend data source.
+- The current schema includes `bike_types`, `bikes`, `reservations`, `payments`, `availability_blocks`, and `admin_users` with foreign keys, indexes, timestamp fields, status check constraints, and USD-cent money columns (`*_usd_cents`).
+- The UI still displays mock USD prices until later migration tasks replace the frontend data source.
 
 ## Verification commands
 

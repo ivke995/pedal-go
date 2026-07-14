@@ -27,6 +27,6 @@ pnpm db:seed
 
 Seed data is idempotent and creates:
 
-- One active `PedalGo City Bike` bike type at 25.00 BAM/day.
+- One active `PedalGo City Bike` bike type at 25.00 USD/day.
 - Two available physical bikes: `CITY-001` and `CITY-002`.
 - One active bootstrap admin user. `ADMIN_BOOTSTRAP_EMAIL` defaults to `admin@pedalgo.local`, and `ADMIN_BOOTSTRAP_NAME` defaults to `PedalGo Admin`.
