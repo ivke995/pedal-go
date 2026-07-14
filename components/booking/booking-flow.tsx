@@ -5,11 +5,13 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { BookingSummary } from '@/components/booking/booking-summary'
-import { CustomerDetailsForm } from '@/components/booking/customer-details-form'
+import {
+  CustomerDetailsForm,
+  type CustomerDetails,
+} from '@/components/booking/customer-details-form'
 import { PaymentPreview } from '@/components/booking/payment-preview'
-import { calculatePrice } from '@/lib/pricing'
-import { DEFAULT_PRICING } from '@/lib/mock-data'
-import type { CustomerDetails, RentalQuote } from '@/lib/types'
+import { calculateRentalDays, calculateTotal, DAILY_RATE } from '@/lib/pricing'
+import type { BookingDraft } from '@/lib/types'
 
 type Step = 'details' | 'payment'
 
@@ -27,14 +29,24 @@ export function BookingFlow() {
   const [step, setStep] = useState<Step>('details')
   const [customer, setCustomer] = useState<CustomerDetails | null>(null)
 
-  const quote = useMemo<RentalQuote>(() => {
+  const draft = useMemo<BookingDraft>(() => {
     const fallback = fallbackRange()
-    const startIso = params.get('start') ?? fallback.start
-    const endIso = params.get('end') ?? fallback.end
-    const quantity = Number(params.get('qty') ?? '1') || 1
-    const breakdown = calculatePrice(startIso, endIso, quantity, DEFAULT_PRICING)
-    return { startIso, endIso, quantity, breakdown, pricing: DEFAULT_PRICING }
+    const pickupAt = params.get('pickup') ?? fallback.start
+    const returnAt = params.get('return') ?? fallback.end
+    const days = calculateRentalDays(new Date(pickupAt), new Date(returnAt))
+
+    return {
+      pickupAt,
+      returnAt,
+      days,
+      dailyRate: DAILY_RATE,
+      total: calculateTotal(days, DAILY_RATE),
+    }
   }, [params])
+
+  function handlePaymentComplete() {
+    router.push('/')
+  }
 
   function handleDetailsSubmit(details: CustomerDetails) {
     setCustomer(details)
@@ -66,14 +78,22 @@ export function BookingFlow() {
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="order-2 lg:order-1">
           {step === 'details' ? (
-            <CustomerDetailsForm defaultValue={customer} onSubmit={handleDetailsSubmit} />
+            <CustomerDetailsForm
+              defaultValues={customer ?? undefined}
+              onSubmit={handleDetailsSubmit}
+            />
           ) : (
-            <PaymentPreview quote={quote} customer={customer!} />
+            <PaymentPreview
+              draft={draft}
+              customer={customer!}
+              onBack={() => setStep('details')}
+              onPay={handlePaymentComplete}
+            />
           )}
         </div>
         <div className="order-1 lg:order-2">
           <div className="lg:sticky lg:top-24">
-            <BookingSummary quote={quote} customer={step === 'payment' ? customer : null} />
+            <BookingSummary draft={draft} />
           </div>
         </div>
       </div>

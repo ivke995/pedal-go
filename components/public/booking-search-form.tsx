@@ -31,6 +31,7 @@ export function BookingSearchForm() {
   // Prefill sensible defaults after mount to avoid hydration mismatch.
   useEffect(() => {
     const now = new Date()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMinPickup(toLocalInput(now))
     const start = new Date(now)
     start.setDate(start.getDate() + 1)

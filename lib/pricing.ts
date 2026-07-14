@@ -1,8 +1,8 @@
 // Frontend-only pricing rules for the MVP.
-// Daily rate is 30 BAM and every started 24-hour period counts as one rental day.
+// Daily rate is 30 USD and every started 24-hour period counts as one rental day.
 
 export const DAILY_RATE = 30
-export const CURRENCY = 'BAM'
+export const CURRENCY = 'USD'
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24
 
@@ -21,7 +21,12 @@ export function calculateTotal(days: number, dailyRate: number = DAILY_RATE): nu
 }
 
 export function formatCurrency(amount: number): string {
-  return `${amount.toLocaleString('en-US')} ${CURRENCY}`
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: CURRENCY,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount)
 }
 
 /**
