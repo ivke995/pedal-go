@@ -1,36 +1,47 @@
 'use client'
 
 import { useState } from 'react'
-import { Lock, ChevronLeft, Info } from 'lucide-react'
+import { Lock, ChevronLeft, Info, CheckCircle2 } from 'lucide-react'
+import { createCheckoutSessionAction } from '@/app/actions/create-checkout-session'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Spinner } from '@/components/ui/spinner'
 import { formatCurrency, formatDateTime, formatDuration } from '@/lib/pricing'
 import type { BookingDraft } from '@/lib/types'
 import type { CustomerDetails } from '@/components/booking/customer-details-form'
+import type { PendingReservationSummary } from '@/lib/public-booking/reservations'
 
 interface PaymentPreviewProps {
   draft: BookingDraft
   customer: CustomerDetails
+  reservation: PendingReservationSummary
   onBack: () => void
-  onPay: () => void
 }
 
 export function PaymentPreview({
   draft,
   customer,
+  reservation,
   onBack,
-  onPay,
 }: PaymentPreviewProps) {
-  const [processing, setProcessing] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
 
-  function handlePay() {
-    setProcessing(true)
-    // Frontend-only: simulate a redirect to a hosted checkout page.
-    window.setTimeout(() => {
-      onPay()
-    }, 1200)
+  async function handleCheckout() {
+    setIsRedirecting(true)
+    setCheckoutError(null)
+
+    const result = await createCheckoutSessionAction({
+      reservationId: reservation.id,
+    })
+
+    if (result.status === 'error') {
+      setCheckoutError(result.message)
+      setIsRedirecting(false)
+      return
+    }
+
+    window.location.assign(result.checkoutUrl)
   }
 
   return (
@@ -46,16 +57,20 @@ export function PaymentPreview({
 
       <div className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center gap-2 text-primary">
-          <Lock className="size-4" aria-hidden="true" />
+          <CheckCircle2 className="size-4" aria-hidden="true" />
           <p className="font-heading text-base font-semibold">
-            Secure checkout
+            Reservation held
           </p>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Review your order below and confirm your payment.
+          Your reservation has been created and is pending payment.
         </p>
 
         <dl className="mt-4 flex flex-col gap-2.5">
+          <div className="flex justify-between gap-4 text-sm">
+            <dt className="text-muted-foreground">Reservation</dt>
+            <dd className="text-right font-medium">{reservation.reference}</dd>
+          </div>
           <div className="flex justify-between gap-4 text-sm">
             <dt className="text-muted-foreground">Rental</dt>
             <dd className="text-right font-medium">PedalGo City Bike</dd>
@@ -84,6 +99,12 @@ export function PaymentPreview({
               {customer.email}
             </dd>
           </div>
+          <div className="flex justify-between gap-4 text-sm">
+            <dt className="text-muted-foreground">Hold expires</dt>
+            <dd className="text-right font-medium">
+              {formatDateTime(reservation.holdExpiresAt)}
+            </dd>
+          </div>
           <Separator className="my-1" />
           <div className="flex items-baseline justify-between gap-4">
             <dt className="font-heading font-semibold">Total amount</dt>
@@ -96,29 +117,26 @@ export function PaymentPreview({
         <Button
           size="lg"
           className="mt-5 w-full"
-          onClick={handlePay}
-          disabled={processing}
+          disabled={isRedirecting}
+          onClick={handleCheckout}
         >
-          {processing ? (
-            <>
-              <Spinner data-icon="inline-start" />
-              Processing…
-            </>
-          ) : (
-            <>
-              <Lock data-icon="inline-start" />
-              {`Pay ${formatCurrency(draft.total)}`}
-            </>
-          )}
+          <Lock data-icon="inline-start" />
+          {isRedirecting ? 'Redirecting to Stripe…' : `Pay with Stripe (${formatCurrency(draft.total)})`}
         </Button>
+        {checkoutError ? (
+          <p className="mt-3 text-sm font-medium text-destructive" role="alert">
+            {checkoutError}
+          </p>
+        ) : null}
       </div>
 
       <Alert>
         <Info />
-        <AlertTitle>This is a preview</AlertTitle>
+        <AlertTitle>Secure Stripe Checkout</AlertTitle>
         <AlertDescription>
-          In production, this step redirects to a secure hosted checkout page
-          (e.g. Stripe Checkout). No card details are collected here.
+          You will be redirected to Stripe to complete payment. Your
+          reservation is confirmed only after Stripe reports a successful
+          payment.
         </AlertDescription>
       </Alert>
     </div>

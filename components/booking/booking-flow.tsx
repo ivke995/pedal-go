@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
+import { createPendingReservationAction } from '@/app/actions/create-pending-reservation'
 import { Button } from '@/components/ui/button'
 import { BookingSummary } from '@/components/booking/booking-summary'
 import {
@@ -12,6 +13,10 @@ import {
 import { PaymentPreview } from '@/components/booking/payment-preview'
 import { calculateRentalDays, calculateTotal, DAILY_RATE } from '@/lib/pricing'
 import type { BookingDraft } from '@/lib/types'
+import type {
+  PendingReservationFieldErrors,
+  PendingReservationSummary,
+} from '@/lib/public-booking/reservations'
 
 type Step = 'details' | 'payment'
 
@@ -28,8 +33,13 @@ export function BookingFlow() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('details')
   const [customer, setCustomer] = useState<CustomerDetails | null>(null)
+  const [pendingReservation, setPendingReservation] =
+    useState<PendingReservationSummary | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [serverErrors, setServerErrors] = useState<PendingReservationFieldErrors>({})
+  const [serverMessage, setServerMessage] = useState<string | null>(null)
 
-  const draft = useMemo<BookingDraft>(() => {
+  const searchDraft = useMemo<BookingDraft>(() => {
     const fallback = fallbackRange()
     const pickupAt = params.get('pickup') ?? fallback.start
     const returnAt = params.get('return') ?? fallback.end
@@ -44,12 +54,34 @@ export function BookingFlow() {
     }
   }, [params])
 
-  function handlePaymentComplete() {
-    router.push('/')
-  }
+  const draft = pendingReservation?.draft ?? searchDraft
 
-  function handleDetailsSubmit(details: CustomerDetails) {
+  async function handleDetailsSubmit(details: CustomerDetails) {
+    setIsSubmitting(true)
+    setServerErrors({})
+    setServerMessage(null)
+
+    const result = await createPendingReservationAction({
+      ...details,
+      pickupAt: searchDraft.pickupAt,
+      returnAt: searchDraft.returnAt,
+    })
+
+    setIsSubmitting(false)
+
+    if (result.status === 'error') {
+      setServerErrors(result.fieldErrors)
+      setServerMessage(result.message)
+      return
+    }
+
+    if (result.status === 'unavailable') {
+      setServerMessage(result.message)
+      return
+    }
+
     setCustomer(details)
+    setPendingReservation(result.reservation)
     setStep('payment')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -81,13 +113,16 @@ export function BookingFlow() {
             <CustomerDetailsForm
               defaultValues={customer ?? undefined}
               onSubmit={handleDetailsSubmit}
+              isSubmitting={isSubmitting}
+              serverErrors={serverErrors}
+              serverMessage={serverMessage}
             />
           ) : (
             <PaymentPreview
               draft={draft}
               customer={customer!}
+              reservation={pendingReservation!}
               onBack={() => setStep('details')}
-              onPay={handlePaymentComplete}
             />
           )}
         </div>

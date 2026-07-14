@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for MVP planning.
+Accepted for MVP planning; current implemented booking/payment behavior is summarized in `context/public-booking/`.
 
 ## Decision
 
@@ -14,7 +14,7 @@ PedalGo MVP is a web application for online bicycle rentals with a customer-firs
 - Customers provide only full name, email address, and phone number during booking.
 - A reservation is valid only after successful online payment.
 - Stripe Checkout is the MVP payment provider.
-- Stripe webhook confirmation, not the success page, finalizes reservations.
+- Verified Stripe webhook confirmation, not the success page, finalizes reservations.
 - Resend is the MVP email provider for booking confirmations.
 - Administrators authenticate at `/admin/login` before accessing the dashboard.
 - Administrators manage reservations, pricing, bicycle availability, maintenance blocks, and payment status visibility.
@@ -34,20 +34,26 @@ PedalGo MVP is a web application for online bicycle rentals with a customer-firs
 
 ## Core statuses
 
-Reservation statuses:
-- `PENDING_PAYMENT`
-- `CONFIRMED`
-- `CANCELLED`
-- `COMPLETED`
-- `PAYMENT_FAILED`
-- `REFUNDED`
+Reservation statuses in code/database:
+- `pending`
+- `confirmed`
+- `cancelled`
+- `completed`
+- `failed`
+- `refunded`
 
-Bicycle statuses:
-- `AVAILABLE`
-- `RESERVED`
-- `RENTED`
-- `MAINTENANCE`
-- `INACTIVE`
+Payment statuses in code/database:
+- `pending`
+- `confirmed`
+- `failed`
+- `refunded`
+
+Bicycle statuses in code/database:
+- `available`
+- `reserved`
+- `rented`
+- `maintenance`
+- `inactive`
 
 ## Explicit non-goals for MVP
 

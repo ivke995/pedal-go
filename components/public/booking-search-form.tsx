@@ -1,16 +1,15 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import { CalendarClock, CalendarCheck, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DateTimeField } from '@/components/date-time-field'
 import { AvailabilityResult } from '@/components/public/availability-result'
-import {
-  DAILY_RATE,
-  calculateRentalDays,
-  calculateTotal,
-} from '@/lib/pricing'
-import type { BookingDraft } from '@/lib/types'
+import { checkFeaturedBikeAvailability } from '@/app/actions/check-featured-bike-availability'
+import type {
+  AvailabilityQuoteFieldErrors,
+  AvailabilityQuoteResult,
+} from '@/lib/public-booking/availability'
 
 function toLocalInput(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -22,11 +21,10 @@ function toLocalInput(date: Date): string {
 export function BookingSearchForm() {
   const [pickup, setPickup] = useState('')
   const [returnAt, setReturnAt] = useState('')
-  const [errors, setErrors] = useState<{ pickup?: string; returnAt?: string }>(
-    {},
-  )
-  const [result, setResult] = useState<BookingDraft | null>(null)
+  const [errors, setErrors] = useState<AvailabilityQuoteFieldErrors>({})
+  const [result, setResult] = useState<AvailabilityQuoteResult | null>(null)
   const [minPickup, setMinPickup] = useState<string | undefined>(undefined)
+  const [isPending, startTransition] = useTransition()
 
   // Prefill sensible defaults after mount to avoid hydration mismatch.
   useEffect(() => {
@@ -53,8 +51,8 @@ export function BookingSearchForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const nextErrors: { pickup?: string; returnAt?: string } = {}
-    if (!pickup) nextErrors.pickup = 'Please choose a pickup date and time.'
+    const nextErrors: AvailabilityQuoteFieldErrors = {}
+    if (!pickup) nextErrors.pickupAt = 'Please choose a pickup date and time.'
     if (!returnAt) nextErrors.returnAt = 'Please choose a return date and time.'
     if (returnError) nextErrors.returnAt = returnError
     setErrors(nextErrors)
@@ -63,13 +61,19 @@ export function BookingSearchForm() {
       return
     }
 
-    const days = calculateRentalDays(new Date(pickup), new Date(returnAt))
-    setResult({
-      pickupAt: pickup,
-      returnAt,
-      days,
-      dailyRate: DAILY_RATE,
-      total: calculateTotal(days, DAILY_RATE),
+    startTransition(async () => {
+      const availability = await checkFeaturedBikeAvailability({
+        pickupAt: pickup,
+        returnAt,
+      })
+
+      if (availability.status === 'error') {
+        setErrors(availability.fieldErrors)
+      } else {
+        setErrors({})
+      }
+
+      setResult(availability)
     })
   }
 
@@ -82,9 +86,9 @@ export function BookingSearchForm() {
           min={minPickup}
           onChange={(v) => {
             setPickup(v)
-            setErrors((prev) => ({ ...prev, pickup: undefined }))
+            setErrors((prev) => ({ ...prev, pickupAt: undefined }))
           }}
-          error={errors.pickup}
+          error={errors.pickupAt}
           icon={<CalendarClock className="size-4 text-primary" />}
         />
         <DateTimeField
@@ -98,13 +102,26 @@ export function BookingSearchForm() {
           error={errors.returnAt ?? returnError}
           icon={<CalendarCheck className="size-4 text-primary" />}
         />
-        <Button type="submit" size="lg" className="mt-1 w-full">
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-1 w-full"
+          disabled={isPending}
+        >
           <Search data-icon="inline-start" />
-          Check Availability
+          {isPending ? 'Checking…' : 'Check Availability'}
         </Button>
       </form>
 
-      {result ? <AvailabilityResult draft={result} /> : null}
+      {result?.status === 'error' ? (
+        <p className="text-sm font-medium text-destructive" role="alert">
+          {result.message}
+        </p>
+      ) : null}
+
+      {result?.status === 'available' || result?.status === 'unavailable' ? (
+        <AvailabilityResult result={result} />
+      ) : null}
     </div>
   )
 }

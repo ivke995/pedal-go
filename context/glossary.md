@@ -5,6 +5,13 @@
 - **Physical bike** — A specific inventory unit, represented in the database by `bikes` and in current UI types by `PhysicalBike`.
 - **Reservation** — A customer rental booking with pickup/return dates, price, and status.
 - **Availability block** — A date range that affects rental availability, such as maintenance, reserved demand, or inactive shop days.
+- **Availability quote** — Public booking response for a requested pickup/return range that reports whether the featured bike type is available and, when available, includes rental days and total USD price.
+- **Pending payment reservation** — A database reservation with status `pending`, customer contact details, rental period, USD total, and assigned-bike hold metadata created before Stripe Checkout payment completes.
+- **Stripe Checkout Session** — Hosted Stripe payment session created for a pending reservation; stores reservation/payment metadata and redirects back to PedalGo success or cancel URLs without confirming the reservation client-side.
+- **Payment record** — Database `payments` row linked to a reservation, created as `pending` with provider `stripe`, amount in USD cents, and Stripe Checkout Session id when checkout starts; Stripe webhooks transition it to `confirmed` or `failed`.
+- **Stripe webhook** — Signed Stripe server-to-server event received at `app/api/stripe/webhook`; successful paid checkout events are the only current path that confirms public booking reservations.
+- **Resend confirmation email** — Customer email sent after webhook-confirmed payment; includes reservation number, pickup/return times, total paid, pickup location, contact information, and pickup instructions.
+- **Featured rental option** — The single public MVP bike type shown in the customer flow, seeded as `bike-type-mvp-city-bike` / `PedalGo City Bike`.
 - **Bootstrap admin** — Initial active admin user created by `pnpm db:seed`; credentials are supplied through seed environment variables rather than committed to the repository.
 - **Rental day** — Current pricing rule: every started 24-hour period counts as one full rental day.
 - **USD** — Current pricing display, quote, and storage currency. UI helpers format USD; server-side pricing helpers and database money fields use USD-cent naming.

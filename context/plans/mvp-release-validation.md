@@ -31,7 +31,7 @@ Perform cross-cutting validation after the foundation, public booking/payment, a
   - Task ID: T02
   - Goal: Validate the full no-account customer booking flow with Stripe test mode and Resend confirmation.
   - Boundaries (in/out of scope): In - homepage, availability, quote, customer details, checkout, webhook, confirmation email, success/cancel status pages. Out - new booking features.
-  - Done when: A test customer booking becomes `CONFIRMED` only after webhook success and sends one correct confirmation email.
+  - Done when: A test customer booking becomes `confirmed` only after webhook success and sends one correct confirmation email.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; Stripe CLI webhook forwarding; Resend provider log/delivery check.
 
 - [ ] T03: `Run admin operations smoke test` (status:todo)

@@ -31,7 +31,7 @@ Schema constraints include foreign keys, indexes for availability/reservation lo
 - Rental days use the MVP rule that every started 24-hour period counts as one full day; invalid or empty ranges return zero days.
 - Price quotes multiply rental days by the supplied daily rate in cents and return USD-cent field names/formatting. Database-backed money fields use USD-cent column/property names.
 - Availability lookup requires an active bike type and available physical bikes.
-- Availability excludes bike-specific confirmed reservation conflicts, unassigned confirmed reservations as capacity consumption, and reserved/maintenance/inactive availability blocks.
+- Availability excludes bike-specific pending or confirmed reservation conflicts, unassigned pending/confirmed reservations as capacity consumption, and reserved/maintenance/inactive availability blocks.
 - Type-wide overlapping availability blocks with no `bike_id` make all bikes for the requested type unavailable during the block window.
 
 ## Environment contract

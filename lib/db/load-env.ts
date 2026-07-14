@@ -43,7 +43,7 @@ function loadEnvFile(path: string) {
 
 export function loadLocalEnv() {
   for (const file of ENV_FILES) {
-    const path = resolve(process.cwd(), file);
+    const path = resolve(/* turbopackIgnore: true */ process.cwd(), file);
 
     if (existsSync(path)) {
       loadEnvFile(path);

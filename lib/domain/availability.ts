@@ -13,7 +13,7 @@ import {
 import { calculateRentalDays, type RentalDateInput } from "./pricing";
 export { rangesOverlap } from "./date-ranges";
 
-export const BLOCKING_RESERVATION_STATUSES = ["confirmed"] as const satisfies readonly ReservationStatus[];
+export const BLOCKING_RESERVATION_STATUSES = ["pending", "confirmed"] as const satisfies readonly ReservationStatus[];
 export const BLOCKING_AVAILABILITY_BLOCK_STATUSES = [
   "reserved",
   "maintenance",

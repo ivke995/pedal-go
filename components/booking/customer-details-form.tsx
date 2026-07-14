@@ -21,7 +21,10 @@ export interface CustomerDetails {
 
 interface CustomerDetailsFormProps {
   defaultValues?: Partial<CustomerDetails>
-  onSubmit: (details: CustomerDetails) => void
+  onSubmit: (details: CustomerDetails) => void | Promise<void>
+  isSubmitting?: boolean
+  serverErrors?: Errors
+  serverMessage?: string | null
 }
 
 interface Errors {
@@ -37,6 +40,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export function CustomerDetailsForm({
   defaultValues,
   onSubmit,
+  isSubmitting = false,
+  serverErrors,
+  serverMessage,
 }: CustomerDetailsFormProps) {
   const [fullName, setFullName] = useState(defaultValues?.fullName ?? '')
   const [email, setEmail] = useState(defaultValues?.email ?? '')
@@ -63,7 +69,7 @@ export function CustomerDetailsForm({
     const next = validate()
     setErrors(next)
     if (Object.keys(next).length > 0) return
-    onSubmit({
+    void onSubmit({
       fullName: fullName.trim(),
       email: email.trim(),
       phone: phone.trim(),
@@ -73,26 +79,33 @@ export function CustomerDetailsForm({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <FieldGroup>
-        <Field data-invalid={errors.fullName ? true : undefined}>
+        {serverMessage ? (
+          <FieldError className="rounded-lg border border-destructive/30 bg-destructive/10 p-3">
+            {serverMessage}
+          </FieldError>
+        ) : null}
+
+        <Field data-invalid={errors.fullName || serverErrors?.fullName ? true : undefined}>
           <FieldLabel htmlFor="fullName">Full name</FieldLabel>
           <Input
             id="fullName"
             value={fullName}
             autoComplete="name"
             placeholder="Jane Doe"
-            aria-invalid={errors.fullName ? true : undefined}
-            aria-describedby={errors.fullName ? 'fullName-error' : undefined}
+            disabled={isSubmitting}
+            aria-invalid={errors.fullName || serverErrors?.fullName ? true : undefined}
+            aria-describedby={errors.fullName || serverErrors?.fullName ? 'fullName-error' : undefined}
             onChange={(e) => {
               setFullName(e.target.value)
               setErrors((p) => ({ ...p, fullName: undefined }))
             }}
           />
-          {errors.fullName ? (
-            <FieldError id="fullName-error">{errors.fullName}</FieldError>
+          {errors.fullName || serverErrors?.fullName ? (
+            <FieldError id="fullName-error">{errors.fullName ?? serverErrors?.fullName}</FieldError>
           ) : null}
         </Field>
 
-        <Field data-invalid={errors.email ? true : undefined}>
+        <Field data-invalid={errors.email || serverErrors?.email ? true : undefined}>
           <FieldLabel htmlFor="email">Email address</FieldLabel>
           <Input
             id="email"
@@ -100,15 +113,16 @@ export function CustomerDetailsForm({
             value={email}
             autoComplete="email"
             placeholder="jane@example.com"
-            aria-invalid={errors.email ? true : undefined}
-            aria-describedby={errors.email ? 'email-error' : undefined}
+            disabled={isSubmitting}
+            aria-invalid={errors.email || serverErrors?.email ? true : undefined}
+            aria-describedby={errors.email || serverErrors?.email ? 'email-error' : undefined}
             onChange={(e) => {
               setEmail(e.target.value)
               setErrors((p) => ({ ...p, email: undefined }))
             }}
           />
-          {errors.email ? (
-            <FieldError id="email-error">{errors.email}</FieldError>
+          {errors.email || serverErrors?.email ? (
+            <FieldError id="email-error">{errors.email ?? serverErrors?.email}</FieldError>
           ) : (
             <FieldDescription>
               Your reservation confirmation will be sent here.
@@ -116,7 +130,7 @@ export function CustomerDetailsForm({
           )}
         </Field>
 
-        <Field data-invalid={errors.phone ? true : undefined}>
+        <Field data-invalid={errors.phone || serverErrors?.phone ? true : undefined}>
           <FieldLabel htmlFor="phone">Phone number</FieldLabel>
           <Input
             id="phone"
@@ -124,15 +138,16 @@ export function CustomerDetailsForm({
             value={phone}
             autoComplete="tel"
             placeholder="+387 61 234 567"
-            aria-invalid={errors.phone ? true : undefined}
-            aria-describedby={errors.phone ? 'phone-error' : undefined}
+            disabled={isSubmitting}
+            aria-invalid={errors.phone || serverErrors?.phone ? true : undefined}
+            aria-describedby={errors.phone || serverErrors?.phone ? 'phone-error' : undefined}
             onChange={(e) => {
               setPhone(e.target.value)
               setErrors((p) => ({ ...p, phone: undefined }))
             }}
           />
-          {errors.phone ? (
-            <FieldError id="phone-error">{errors.phone}</FieldError>
+          {errors.phone || serverErrors?.phone ? (
+            <FieldError id="phone-error">{errors.phone ?? serverErrors?.phone}</FieldError>
           ) : null}
         </Field>
 
@@ -144,6 +159,7 @@ export function CustomerDetailsForm({
           <Checkbox
             id="terms"
             checked={terms}
+            disabled={isSubmitting}
             aria-invalid={errors.terms ? true : undefined}
             onCheckedChange={(v) => {
               setTerms(v === true)
@@ -166,6 +182,7 @@ export function CustomerDetailsForm({
           <Checkbox
             id="privacy"
             checked={privacy}
+            disabled={isSubmitting}
             aria-invalid={errors.privacy ? true : undefined}
             onCheckedChange={(v) => {
               setPrivacy(v === true)
@@ -180,8 +197,8 @@ export function CustomerDetailsForm({
           <FieldError className="-mt-2">{errors.privacy}</FieldError>
         ) : null}
 
-        <Button type="submit" size="lg" className="w-full">
-          Continue to Payment
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Creating reservation…' : 'Reserve and Continue'}
           <ArrowRight data-icon="inline-end" />
         </Button>
       </FieldGroup>
