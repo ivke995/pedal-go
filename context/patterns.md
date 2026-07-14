@@ -17,8 +17,16 @@
 ## Domain logic
 
 - Keep domain types in `lib/types.ts`.
-- Keep pricing calculations and USD display formatting helpers in `lib/pricing.ts`.
-- Keep mock/static app data in `lib/mock-data.ts` until a real backend exists.
+- Keep current UI pricing calculations and USD display formatting helpers in `lib/pricing.ts` until booking paths migrate to database-backed BAM pricing.
+- Keep server-side database-backed rental pricing and availability logic in `lib/domain/`; do not import those helpers into client components when they pull in database access.
+- Keep mock/static app data in `lib/mock-data.ts` until individual UI paths migrate to database-backed access.
+- Keep database connection code under `lib/db/`; do not import the database client into client components.
+- Keep Drizzle tables, relations, status constants, indexes, and database check constraints in `lib/db/schema.ts`.
+- Store database-backed money values as BAM minor units using `*_bam_cents` columns.
+- Generate migrations with `pnpm db:generate` using `TURSO_DATABASE_URL`.
+- Keep MVP seed data in `scripts/seed.ts`; seeds should be idempotent, avoid committed secrets, and require explicit bootstrap credentials through environment variables loaded from the shell, `.env.local`, or `.env`.
+- Cover server-side domain behavior with Node test-runner tests under `tests/domain/`; run them with `pnpm test`.
+- Keep database foundation details in `context/database/foundation.md`; core context should summarize and link rather than duplicate the full schema.
 
 ## SCE workflow
 

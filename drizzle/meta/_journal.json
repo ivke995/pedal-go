@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1784054393639,
+      "tag": "0000_lyrical_amazoness",
+      "breakpoints": true
+    }
+  ]
+}

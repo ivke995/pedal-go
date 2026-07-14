@@ -8,6 +8,7 @@ Use this file first to find relevant durable context before changing code.
 - `context/architecture.md` — Current app structure, data boundaries, and verification commands.
 - `context/patterns.md` — Coding, UI, domain, and SCE workflow conventions.
 - `context/glossary.md` — Project and domain terms.
+- `context/database/foundation.md` — Turso/libSQL, Drizzle setup, rental schema, domain services, env contract, and migration commands.
 
 ## Working artifacts
 
@@ -26,3 +27,9 @@ Use this file first to find relevant durable context before changing code.
 - `lib/types.ts` — Shared domain types.
 - `lib/pricing.ts` — Pricing and formatting helpers.
 - `lib/mock-data.ts` — Mock inventory, reservations, availability, and metrics data.
+- `lib/db/` — Database env validation, Turso/libSQL client, and Drizzle rental schema.
+- `lib/domain/` — Server-side BAM pricing and availability services for database-backed rental flows.
+- `scripts/seed.ts` — MVP city-bike inventory and bootstrap admin seed workflow.
+- `tests/domain/` — Unit tests for server-side pricing, date-range, and availability domain services.
+- `drizzle.config.ts` — Drizzle Kit migration configuration.
+- `drizzle/` — Generated Drizzle migration metadata/output.
