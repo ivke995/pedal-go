@@ -1,0 +1,8 @@
+{
+  "$schema": "https://sce.crocoder.dev/config.json",
+  "integrations": {
+    "target": [
+      "opencode"
+    ]
+  }
+}
