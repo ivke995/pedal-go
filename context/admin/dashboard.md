@@ -7,12 +7,12 @@ PedalGo has a protected MVP administrator dashboard under `app/admin/(dashboard)
 - `app/admin/(dashboard)/layout.tsx` protects all dashboard routes with `requireAuthenticatedAdmin()` and renders the shared admin header, logout form, and dashboard navigation.
 - `app/admin/(dashboard)/page.tsx` renders `/admin` as the operations summary.
 - `app/admin/(dashboard)/reservations/page.tsx` renders the reservation list/search view, manual reservation creation form, and reservation cancellation controls.
-- `app/admin/(dashboard)/pricing/page.tsx` establishes the featured rental pricing route boundary.
+- `app/admin/(dashboard)/pricing/page.tsx` renders active bike-type daily-rate management.
 - `app/admin/(dashboard)/availability/page.tsx` establishes the availability-block and maintenance route boundary.
 - `app/admin/(dashboard)/calendar/page.tsx` establishes the schedule/calendar visibility route boundary.
 - `app/admin/(dashboard)/reports/page.tsx` establishes the reporting route boundary.
 
-Pricing, availability, calendar, and reports are currently server-rendered protected placeholders unless noted otherwise. Automated payment/refund handling, pricing edits, and availability block mutations belong to later admin dashboard tasks.
+Availability, calendar, and reports are currently server-rendered protected placeholders unless noted otherwise. Automated payment/refund handling and availability block mutations belong to later admin dashboard tasks.
 
 ## Summary metrics
 
@@ -69,6 +69,20 @@ Terminal statuses (`cancelled`, `completed`, `failed`, `refunded`) are not cance
 update payment rows and does not automate Stripe refunds; existing payment status/provider details remain visible in the
 reservation list. Because availability only treats `pending` and `confirmed` reservations as blocking, cancelled
 reservations no longer reduce bike availability.
+
+## Pricing management
+
+`lib/admin-dashboard/pricing.ts` is the server-side helper for admin pricing and `app/admin/actions.ts` exposes it through
+`updateBikeTypeDailyPriceAction` after requiring an authenticated admin.
+
+The `/admin/pricing` page lists active bike types ordered by sort/name and renders a daily USD price form for each active
+type. Updates validate prices as positive USD amounts from `0.01` to `9,999.99` with at most two decimals, store the value
+as `bike_types.daily_rate_usd_cents`, and write `bike_types.updated_at` for audit-friendly change visibility.
+
+Pricing updates only mutate the active bike-type row. Existing reservation rows keep their stored `daily_rate_usd_cents`
+and `total_usd_cents`, so historical/paid totals are not recalculated. New homepage availability quotes, public pending
+reservations, and admin manual reservations use the current bike-type daily rate through existing availability/pricing
+helpers.
 
 ## Related context
 

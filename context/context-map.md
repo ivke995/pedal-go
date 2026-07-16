@@ -10,7 +10,7 @@ Use this file first to find relevant durable context before changing code.
 - `context/glossary.md` — Project and domain terms.
 - `context/database/foundation.md` — Turso/libSQL, Drizzle setup, rental schema, domain services, env contract, and migration commands.
 - `context/admin/authentication.md` — Admin login, active-admin credential verification, signed session cookie, logout, and protected admin route boundaries.
-- `context/admin/dashboard.md` — Protected admin dashboard navigation, operations summary, reservation list/search, manual reservation creation, and reservation cancellation boundaries.
+- `context/admin/dashboard.md` — Protected admin dashboard navigation, operations summary, reservation list/search, manual reservation creation, reservation cancellation, and pricing management boundaries.
 - `context/public-booking/availability.md` — Homepage availability quote flow, server action boundary, and no-side-effect booking entry behavior.
 - `context/public-booking/reservations.md` — Customer details submission, pending reservation creation, and assigned-bike hold strategy.
 - `context/public-booking/payments.md` — Stripe Checkout creation, pending payment records, metadata contract, webhook-only reservation confirmation, Resend confirmation email trigger, and failed/expired payment handling.
@@ -38,7 +38,7 @@ Use this file first to find relevant durable context before changing code.
 - `lib/mock-data.ts` — Static featured city-bike fixture still used by public display components.
 - `lib/db/` — Database env validation, Turso/libSQL client, and Drizzle rental schema.
 - `lib/admin-auth/` — Server-only admin password verification, signed session cookie handling, and active-admin lookup.
-- `lib/admin-dashboard/` — Server-side admin dashboard summary, reservation list/search, manual reservation creation, and reservation cancellation helpers.
+- `lib/admin-dashboard/` — Server-side admin dashboard summary, reservation list/search, manual reservation creation, reservation cancellation, and pricing management helpers.
 - `lib/domain/` — Server-side USD pricing and availability services for database-backed rental flows.
 - `lib/public-booking/` — Public booking orchestration, UI-safe availability quote results, Stripe Checkout, webhook finalization, confirmation email, and read-only post-checkout status lookup.
 - `scripts/seed.ts` — MVP city-bike inventory and bootstrap admin seed workflow.
