@@ -3,7 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { createManualReservationAction } from "@/app/admin/actions";
+import { cancelReservationAction, createManualReservationAction } from "@/app/admin/actions";
+import { canCancelAdminReservation } from "@/lib/admin-dashboard/cancellations";
 import {
   getAdminCreateReservationStatuses,
   getAdminReservationFormBikeTypes,
@@ -28,6 +29,8 @@ type AdminReservationsPageProps = {
     paymentStatus?: string | string[];
     created?: string | string[];
     createError?: string | string[];
+    cancelled?: string | string[];
+    cancelError?: string | string[];
   }>;
 };
 
@@ -64,6 +67,8 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
   ]);
   const createdReference = firstParam(params.created).trim();
   const createError = firstParam(params.createError).trim();
+  const cancelledReference = firstParam(params.cancelled).trim();
+  const cancelError = firstParam(params.cancelError).trim();
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">
@@ -153,6 +158,16 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
           {createError ? (
             <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
               {createError}
+            </div>
+          ) : null}
+          {cancelledReference ? (
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+              Cancelled reservation {cancelledReference}. Payment status remains visible in the records below.
+            </div>
+          ) : null}
+          {cancelError ? (
+            <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              {cancelError}
             </div>
           ) : null}
           <form action={createManualReservationAction} className="grid gap-4 md:grid-cols-2">
@@ -257,11 +272,15 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
                   <TableHead>Status</TableHead>
                   <TableHead>Payment</TableHead>
                   <TableHead className="text-right">Total</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {result.reservations.map((reservation) => (
-                  <TableRow key={reservation.id}>
+                {result.reservations.map((reservation) => {
+                  const cancellable = canCancelAdminReservation(reservation.reservationStatus);
+
+                  return (
+                    <TableRow key={reservation.id}>
                     <TableCell>
                       <div className="font-medium">{reservation.reference}</div>
                       <div className="text-xs text-muted-foreground">
@@ -290,8 +309,22 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
                     <TableCell className="text-right font-medium">
                       {formatCurrency(reservation.totalUsdCents / 100)}
                     </TableCell>
+                    <TableCell>
+                      {cancellable ? (
+                        <form action={cancelReservationAction} className="flex min-w-48 flex-col gap-2">
+                          <input type="hidden" name="reservationId" value={reservation.id} />
+                          <Input name="reason" placeholder="Cancellation note" aria-label={`Cancellation note for ${reservation.reference}`} />
+                          <Button type="submit" variant="outline" size="sm">
+                            Cancel reservation
+                          </Button>
+                        </form>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Not cancellable</span>
+                      )}
+                    </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           ) : (

@@ -6,13 +6,13 @@ PedalGo has a protected MVP administrator dashboard under `app/admin/(dashboard)
 
 - `app/admin/(dashboard)/layout.tsx` protects all dashboard routes with `requireAuthenticatedAdmin()` and renders the shared admin header, logout form, and dashboard navigation.
 - `app/admin/(dashboard)/page.tsx` renders `/admin` as the operations summary.
-- `app/admin/(dashboard)/reservations/page.tsx` renders the reservation list/search view and manual reservation creation form.
+- `app/admin/(dashboard)/reservations/page.tsx` renders the reservation list/search view, manual reservation creation form, and reservation cancellation controls.
 - `app/admin/(dashboard)/pricing/page.tsx` establishes the featured rental pricing route boundary.
 - `app/admin/(dashboard)/availability/page.tsx` establishes the availability-block and maintenance route boundary.
 - `app/admin/(dashboard)/calendar/page.tsx` establishes the schedule/calendar visibility route boundary.
 - `app/admin/(dashboard)/reports/page.tsx` establishes the reporting route boundary.
 
-Pricing, availability, calendar, and reports are currently server-rendered protected placeholders unless noted otherwise. Reservation cancellation, payment/refund handling, pricing edits, and availability block mutations belong to later admin dashboard tasks.
+Pricing, availability, calendar, and reports are currently server-rendered protected placeholders unless noted otherwise. Automated payment/refund handling, pricing edits, and availability block mutations belong to later admin dashboard tasks.
 
 ## Summary metrics
 
@@ -38,8 +38,9 @@ The reservations page reads GET query parameters from `searchParams` and renders
 - `paymentStatus` filters by `PAYMENT_STATUSES` or `none`; invalid values fall back to all payments.
 
 The table displays reservation reference, customer details, pickup/return window, rental duration, reservation status,
-latest joined payment status/provider, bike type, assigned bike code when present, and total USD amount. The query limits
-results to the newest 100 matching rows and collapses duplicate joined payment rows by reservation id.
+latest joined payment status/provider, bike type, assigned bike code when present, total USD amount, and cancellation
+controls for cancellable rows. The query limits results to the newest 100 matching rows and collapses duplicate joined
+payment rows by reservation id.
 
 ## Manual reservation creation
 
@@ -54,6 +55,20 @@ and `quoteRentalPrice()` immediately before insert, assigns the first available 
 Manual reservation creation does not create a `payments` row, charge customer cards, or create customer accounts. Because
 availability treats `pending` and `confirmed` reservations as blocking, successful manual reservations appear in the list
 and block later customer/admin bookings for the same rental window.
+
+## Reservation cancellation
+
+`lib/admin-dashboard/cancellations.ts` is the server-side helper for admin cancellations and `app/admin/actions.ts`
+exposes it through `cancelReservationAction` after requiring an authenticated admin.
+
+Admins can cancel reservations currently in `pending` or `confirmed` status from `/admin/reservations`. The action updates
+the reservation status to `cancelled`, writes `notes.cancellation` metadata with `cancelledBy = "admin"`, `cancelledAt`,
+and optional reason, and redirects back to the reservation list with a success/error query message.
+
+Terminal statuses (`cancelled`, `completed`, `failed`, `refunded`) are not cancellable. Cancellation does not create or
+update payment rows and does not automate Stripe refunds; existing payment status/provider details remain visible in the
+reservation list. Because availability only treats `pending` and `confirmed` reservations as blocking, cancelled
+reservations no longer reduce bike availability.
 
 ## Related context
 

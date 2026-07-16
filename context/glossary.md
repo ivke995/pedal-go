@@ -17,6 +17,7 @@
 - **Admin dashboard shell** — Protected `/admin` route group with shared admin header, logout, navigation, section routes, and database-backed operations summary metrics.
 - **Admin reservation list** — Protected `/admin/reservations` view backed by `lib/admin-dashboard/reservations.ts`; supports reservation/customer search, reservation status filtering, payment status visibility, and access to manual reservation creation.
 - **Manual reservation** — Admin-created reservation inserted from `/admin/reservations` without charging a card; backed by `lib/admin-dashboard/manual-reservations.ts`, availability re-checks, current USD price calculation, and optional `pending`/`confirmed` status selection.
+- **Admin reservation cancellation** — Protected `/admin/reservations` action backed by `lib/admin-dashboard/cancellations.ts`; allows admins to move `pending` or `confirmed` reservations to `cancelled`, records cancellation metadata in reservation notes, and leaves payment/refund state visible but unchanged.
 - **Rental day** — Current pricing rule: every started 24-hour period counts as one full rental day.
 - **USD** — Current pricing display, quote, and storage currency. UI helpers format USD; server-side pricing helpers and database money fields use USD-cent naming.
 - **Turso** — Hosted libSQL database provider used for PedalGo database environments.
