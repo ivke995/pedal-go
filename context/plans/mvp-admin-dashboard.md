@@ -21,12 +21,16 @@ Implement the authenticated administrator experience for PedalGo MVP: `/admin/lo
 
 ## Task stack
 
-- [ ] T01: `Implement admin authentication foundation` (status:todo)
+- [x] T01: `Implement admin authentication foundation` (status:done)
   - Task ID: T01
   - Goal: Add secure admin login/logout/session handling for `/admin/login` and protected admin routes.
   - Boundaries (in/out of scope): In - admin credential verification against `AdminUser`, password hashing/session cookie strategy, route protection. Out - multiple roles, password reset, customer login.
   - Done when: Unauthenticated users cannot access admin dashboard routes; authenticated admins can log in and log out securely.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; manually test protected route redirects and session expiry behavior.
+  - Completed: 2026-07-16
+  - Files changed: `lib/admin-auth/password.ts`, `lib/admin-auth/session.ts`, `lib/admin-auth/auth.ts`, `app/admin/(auth)/login/*`, `app/admin/(dashboard)/*`, `app/admin/actions.ts`
+  - Evidence: `pnpm lint` passed; `pnpm build` passed.
+  - Notes: Added database-backed active-admin credential verification, PBKDF2 seeded password hash verification, signed HTTP-only admin session cookie, `/admin/login`, protected `/admin`, and logout action.
 
 - [ ] T02: `Create admin dashboard shell and navigation` (status:todo)
   - Task ID: T02

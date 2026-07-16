@@ -13,6 +13,7 @@
 - **Resend confirmation email** — Customer email sent after webhook-confirmed payment; includes reservation number, pickup/return times, total paid, pickup location, contact information, and pickup instructions.
 - **Featured rental option** — The single public MVP bike type shown in the customer flow, seeded as `bike-type-mvp-city-bike` / `PedalGo City Bike`.
 - **Bootstrap admin** — Initial active admin user created by `pnpm db:seed`; credentials are supplied through seed environment variables rather than committed to the repository.
+- **Admin session** — Signed HTTP-only cookie named `pedalgo_admin_session` that grants active administrators access to `/admin` routes for the current MVP session window.
 - **Rental day** — Current pricing rule: every started 24-hour period counts as one full rental day.
 - **USD** — Current pricing display, quote, and storage currency. UI helpers format USD; server-side pricing helpers and database money fields use USD-cent naming.
 - **Turso** — Hosted libSQL database provider used for PedalGo database environments.
