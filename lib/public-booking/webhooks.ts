@@ -140,14 +140,6 @@ async function confirmPaidCheckoutSession(
     .where(eq(payments.id, payment.id))
 
   if (reservation.status === 'pending') {
-    await database
-      .update(reservations)
-      .set({
-        status: 'confirmed',
-        updatedAt: now,
-      })
-      .where(eq(reservations.id, reservation.id))
-
     const emailSender = sendConfirmationEmail ?? createResendConfirmationEmailSender()
 
     await emailSender(buildConfirmationEmailMessage({
@@ -155,6 +147,14 @@ async function confirmPaidCheckoutSession(
       status: 'confirmed',
       updatedAt: now,
     }))
+
+    await database
+      .update(reservations)
+      .set({
+        status: 'confirmed',
+        updatedAt: now,
+      })
+      .where(eq(reservations.id, reservation.id))
   }
 
   return {

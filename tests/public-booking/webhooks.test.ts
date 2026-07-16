@@ -205,6 +205,30 @@ describe('public booking Stripe webhooks', () => {
     assert.equal(sentEmails.length, 0)
   })
 
+  it('does not confirm the reservation when confirmation email sending fails', async () => {
+    const now = new Date('2026-07-14T09:20:00.000Z')
+    const database = fakeDatabase([[pendingPayment], [pendingReservation]])
+
+    await assert.rejects(
+      handleStripeWebhookEvent(checkoutEvent('checkout.session.completed'), database as never, {
+        now,
+        sendConfirmationEmail: async () => {
+          throw new Error('Email provider rejected sender')
+        },
+      }),
+      /Email provider rejected sender/,
+    )
+
+    assert.deepEqual(database.updatedPayments[0], {
+      status: 'confirmed',
+      providerCheckoutId: 'cs_test_123',
+      providerPaymentId: 'pi_test_123',
+      paidAt: new Date('2026-07-14T14:35:00.000Z'),
+      updatedAt: now,
+    })
+    assert.equal(database.updatedReservations.length, 0)
+  })
+
   it('marks pending reservation failed when checkout session expires', async () => {
     const now = new Date('2026-07-14T09:35:00.000Z')
     const database = fakeDatabase([[pendingPayment], [pendingReservation]])
