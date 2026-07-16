@@ -65,12 +65,16 @@ Implement the authenticated administrator experience for PedalGo MVP: `/admin/lo
   - Evidence: `pnpm test` passed (32 tests); `pnpm lint` passed; `pnpm build` passed.
   - Notes: Added protected admin manual reservation creation with active bike-type selection, customer/rental inputs, pending/confirmed status selection, immediate availability re-check, current USD price calculation, assigned-bike hold, and no admin card charging.
 
-- [ ] T05: `Add reservation cancellation workflow` (status:todo)
+- [x] T05: `Add reservation cancellation workflow` (status:done)
   - Task ID: T05
   - Goal: Allow admins to cancel reservations and preserve payment/refund status visibility.
   - Boundaries (in/out of scope): In - cancellation action, status transition validation, optional cancellation reason/internal note. Out - automated Stripe refunds unless explicitly added in a later task/plan.
   - Done when: Cancellable reservations can move to `CANCELLED`; invalid status transitions are blocked; availability reflects cancellations.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; manually cancel confirmed and non-cancellable sample reservations.
+  - Completed: 2026-07-16
+  - Files changed: `lib/admin-dashboard/cancellations.ts`, `app/admin/actions.ts`, `app/admin/(dashboard)/reservations/page.tsx`, `tests/admin-dashboard/cancellations.test.ts`
+  - Evidence: `pnpm test tests/admin-dashboard/cancellations.test.ts` passed (35 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed.
+  - Notes: Added protected admin cancellation action for pending/confirmed reservations, invalid-transition blocking for terminal statuses, cancellation metadata in reservation notes, and per-row admin cancellation controls while preserving existing payment records/status display. Cancelled reservations are non-blocking through existing availability status rules.
 
 - [ ] T06: `Implement pricing management` (status:todo)
   - Task ID: T06
