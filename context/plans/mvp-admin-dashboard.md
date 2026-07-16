@@ -87,12 +87,16 @@ Implement the authenticated administrator experience for PedalGo MVP: `/admin/lo
   - Evidence: `pnpm test` passed (38 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed.
   - Notes: Added protected admin pricing management for active bike types with USD validation, daily-rate updates on `bike_types`, updated timestamp writes, and tests confirming only bike-type pricing changes while existing reservation totals remain unchanged. Existing availability/manual/public booking quote paths read current bike-type rates for new calculations.
 
-- [ ] T07: `Implement availability blocks and maintenance management` (status:todo)
+- [x] T07: `Implement availability blocks and maintenance management` (status:done)
   - Task ID: T07
   - Goal: Let admins block bicycles for maintenance, repairs, internal use, or inactive periods.
   - Boundaries (in/out of scope): In - create/update/delete availability blocks, reason/status display, conflict checks. Out - public category UI and advanced resource scheduling.
   - Done when: Availability blocks prevent customer/admin booking conflicts and are visible in admin availability views.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; create a maintenance block and verify the same range becomes unavailable.
+  - Completed: 2026-07-16
+  - Files changed: `lib/admin-dashboard/availability-blocks.ts`, `app/admin/actions.ts`, `app/admin/(dashboard)/availability/page.tsx`, `tests/admin-dashboard/availability-blocks.test.ts`
+  - Evidence: `pnpm test` passed (43 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed.
+  - Notes: Added protected admin availability block creation/update/delete for active bike types or specific bikes, reason/status/note display, reservation and block conflict checks, and tests confirming saved blocks make matching booking windows unavailable through the shared availability service.
 
 - [ ] T08: `Add availability calendar view` (status:todo)
   - Task ID: T08

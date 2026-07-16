@@ -19,6 +19,7 @@
 - **Manual reservation** — Admin-created reservation inserted from `/admin/reservations` without charging a card; backed by `lib/admin-dashboard/manual-reservations.ts`, availability re-checks, current USD price calculation, and optional `pending`/`confirmed` status selection.
 - **Admin reservation cancellation** — Protected `/admin/reservations` action backed by `lib/admin-dashboard/cancellations.ts`; allows admins to move `pending` or `confirmed` reservations to `cancelled`, records cancellation metadata in reservation notes, and leaves payment/refund state visible but unchanged.
 - **Admin pricing management** — Protected `/admin/pricing` workflow backed by `lib/admin-dashboard/pricing.ts`; updates active bike-type daily USD rates for new quotes/bookings without recalculating existing reservation totals.
+- **Admin availability block management** — Protected `/admin/availability` workflow backed by `lib/admin-dashboard/availability-blocks.ts`; lets admins create, update, delete, and review bike-type or bike-specific reserved/maintenance/inactive blocks that feed shared booking availability checks.
 - **Rental day** — Current pricing rule: every started 24-hour period counts as one full rental day.
 - **USD** — Current pricing display, quote, and storage currency. UI helpers format USD; server-side pricing helpers and database money fields use USD-cent naming.
 - **Turso** — Hosted libSQL database provider used for PedalGo database environments.

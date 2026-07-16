@@ -8,11 +8,11 @@ PedalGo has a protected MVP administrator dashboard under `app/admin/(dashboard)
 - `app/admin/(dashboard)/page.tsx` renders `/admin` as the operations summary.
 - `app/admin/(dashboard)/reservations/page.tsx` renders the reservation list/search view, manual reservation creation form, and reservation cancellation controls.
 - `app/admin/(dashboard)/pricing/page.tsx` renders active bike-type daily-rate management.
-- `app/admin/(dashboard)/availability/page.tsx` establishes the availability-block and maintenance route boundary.
+- `app/admin/(dashboard)/availability/page.tsx` renders availability-block creation, update, deletion, and listing for maintenance/inactive/internal-use windows.
 - `app/admin/(dashboard)/calendar/page.tsx` establishes the schedule/calendar visibility route boundary.
 - `app/admin/(dashboard)/reports/page.tsx` establishes the reporting route boundary.
 
-Availability, calendar, and reports are currently server-rendered protected placeholders unless noted otherwise. Automated payment/refund handling and availability block mutations belong to later admin dashboard tasks.
+Calendar and reports are currently server-rendered protected placeholders unless noted otherwise. Automated payment/refund handling remains out of scope.
 
 ## Summary metrics
 
@@ -83,6 +83,22 @@ Pricing updates only mutate the active bike-type row. Existing reservation rows 
 and `total_usd_cents`, so historical/paid totals are not recalculated. New homepage availability quotes, public pending
 reservations, and admin manual reservations use the current bike-type daily rate through existing availability/pricing
 helpers.
+
+## Availability block management
+
+`lib/admin-dashboard/availability-blocks.ts` is the server-side helper for admin availability blocks and
+`app/admin/actions.ts` exposes it through `upsertAvailabilityBlockAction` and `deleteAvailabilityBlockAction` after
+requiring an authenticated admin.
+
+The `/admin/availability` page lists the newest availability blocks and provides forms to create, update, or delete
+blocks scoped to an active bike type or a specific physical bike. Blocks store a reason/label, one of
+`reserved`/`maintenance`/`inactive`, start/end timestamps, and an optional internal note.
+
+Creation and updates validate date order, status, selected bike/bike-type consistency, and conflicts with overlapping
+`pending`/`confirmed` reservations or overlapping availability blocks for the same resource. Successful block mutations
+revalidate admin availability/reservations plus public booking entry paths. Because `lib/domain/availability.ts` treats
+reserved, maintenance, and inactive blocks as blocking, saved blocks prevent new public bookings and admin manual
+reservations for matching windows. Deleting a block removes only that block; reservations and payments are not mutated.
 
 ## Related context
 
