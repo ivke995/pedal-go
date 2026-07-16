@@ -3,6 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { createManualReservationAction } from "@/app/admin/actions";
+import {
+  getAdminCreateReservationStatuses,
+  getAdminReservationFormBikeTypes,
+} from "@/lib/admin-dashboard/manual-reservations";
 import {
   getAdminReservations,
   parsePaymentStatus,
@@ -21,6 +26,8 @@ type AdminReservationsPageProps = {
     search?: string | string[];
     status?: string | string[];
     paymentStatus?: string | string[];
+    created?: string | string[];
+    createError?: string | string[];
   }>;
 };
 
@@ -51,7 +58,12 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
   const search = firstParam(params.search).trim();
   const reservationStatus = parseReservationStatus(firstParam(params.status));
   const paymentStatus = parsePaymentStatus(firstParam(params.paymentStatus));
-  const result = await getAdminReservations({ search, reservationStatus, paymentStatus });
+  const [result, bikeTypeOptions] = await Promise.all([
+    getAdminReservations({ search, reservationStatus, paymentStatus }),
+    getAdminReservationFormBikeTypes(),
+  ]);
+  const createdReference = firstParam(params.created).trim();
+  const createError = firstParam(params.createError).trim();
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">
@@ -119,6 +131,109 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
               <Button type="reset" variant="outline" render={<a href="/admin/reservations" />}>
                 Reset
               </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Create manual reservation</CardTitle>
+          <CardDescription>
+            Create an admin-only reservation after re-checking availability and calculating the current rental price.
+            Manual reservations do not charge customer cards.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {createdReference ? (
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+              Created reservation {createdReference}. It is now visible in the list below.
+            </div>
+          ) : null}
+          {createError ? (
+            <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              {createError}
+            </div>
+          ) : null}
+          <form action={createManualReservationAction} className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="text-sm font-medium" htmlFor="manual-bike-type">
+                Bike type
+              </label>
+              <select
+                id="manual-bike-type"
+                name="bikeTypeId"
+                required
+                className="mt-1 h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
+              >
+                {bikeTypeOptions.length === 0 ? <option value="">No active bike types</option> : null}
+                {bikeTypeOptions.map((bikeType) => (
+                  <option key={bikeType.id} value={bikeType.id}>
+                    {bikeType.name} — {formatCurrency(bikeType.dailyRateUsdCents / 100)} / day
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium" htmlFor="manual-status">
+                Reservation status
+              </label>
+              <select
+                id="manual-status"
+                name="status"
+                defaultValue="confirmed"
+                className="mt-1 h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
+              >
+                {getAdminCreateReservationStatuses().map((status) => (
+                  <option key={status} value={status}>
+                    {statusLabel(status)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium" htmlFor="manual-full-name">
+                Customer name
+              </label>
+              <Input id="manual-full-name" name="fullName" required minLength={2} className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium" htmlFor="manual-email">
+                Customer email
+              </label>
+              <Input id="manual-email" name="email" type="email" required className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium" htmlFor="manual-phone">
+                Customer phone
+              </label>
+              <Input id="manual-phone" name="phone" required className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium" htmlFor="manual-pickup">
+                Pickup
+              </label>
+              <Input id="manual-pickup" name="pickupAt" type="datetime-local" required className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium" htmlFor="manual-return">
+                Return
+              </label>
+              <Input id="manual-return" name="returnAt" type="datetime-local" required className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium" htmlFor="manual-notes">
+                Internal note
+              </label>
+              <Input id="manual-notes" name="notes" placeholder="Optional" className="mt-1" />
+            </div>
+            <div className="md:col-span-2">
+              <Button type="submit" disabled={bikeTypeOptions.length === 0}>
+                Create reservation
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Availability is checked immediately before saving; unavailable/conflicting rentals are blocked.
+              </p>
             </div>
           </form>
         </CardContent>

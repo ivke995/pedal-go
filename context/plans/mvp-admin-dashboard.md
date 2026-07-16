@@ -54,12 +54,16 @@ Implement the authenticated administrator experience for PedalGo MVP: `/admin/lo
   - Evidence: `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed; `pnpm test` passed (29 tests).
   - Notes: Added server-only reservation listing/search/filter query boundary and protected admin table with reservation status, payment status, customer, rental window, assignment, and total display. Manual creation and cancellation remain out of scope.
 
-- [ ] T04: `Add manual reservation creation` (status:todo)
+- [x] T04: `Add manual reservation creation` (status:done)
   - Task ID: T04
   - Goal: Allow admins to create reservations manually after checking availability and price.
   - Boundaries (in/out of scope): In - admin-only form, customer details, rental period, availability validation, status selection/default. Out - charging customer cards from admin and customer account creation.
   - Done when: Admin-created reservations cannot double-book unavailable bikes and appear in the reservation list/calendar.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; manually create valid and conflicting admin reservations.
+  - Completed: 2026-07-16
+  - Files changed: `lib/admin-dashboard/manual-reservations.ts`, `app/admin/actions.ts`, `app/admin/(dashboard)/reservations/page.tsx`, `tests/admin-dashboard/manual-reservations.test.ts`
+  - Evidence: `pnpm test` passed (32 tests); `pnpm lint` passed; `pnpm build` passed.
+  - Notes: Added protected admin manual reservation creation with active bike-type selection, customer/rental inputs, pending/confirmed status selection, immediate availability re-check, current USD price calculation, assigned-bike hold, and no admin card charging.
 
 - [ ] T05: `Add reservation cancellation workflow` (status:todo)
   - Task ID: T05
