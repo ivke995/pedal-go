@@ -9,10 +9,10 @@ PedalGo has a protected MVP administrator dashboard under `app/admin/(dashboard)
 - `app/admin/(dashboard)/reservations/page.tsx` renders the reservation list/search view, manual reservation creation form, and reservation cancellation controls.
 - `app/admin/(dashboard)/pricing/page.tsx` renders active bike-type daily-rate management.
 - `app/admin/(dashboard)/availability/page.tsx` renders availability-block creation, update, deletion, and listing for maintenance/inactive/internal-use windows.
-- `app/admin/(dashboard)/calendar/page.tsx` establishes the schedule/calendar visibility route boundary.
+- `app/admin/(dashboard)/calendar/page.tsx` renders the month-navigation availability calendar/list hybrid.
 - `app/admin/(dashboard)/reports/page.tsx` establishes the reporting route boundary.
 
-Calendar and reports are currently server-rendered protected placeholders unless noted otherwise. Automated payment/refund handling remains out of scope.
+Reports is currently a server-rendered protected placeholder unless noted otherwise. Automated payment/refund handling remains out of scope.
 
 ## Summary metrics
 
@@ -99,6 +99,20 @@ Creation and updates validate date order, status, selected bike/bike-type consis
 revalidate admin availability/reservations plus public booking entry paths. Because `lib/domain/availability.ts` treats
 reserved, maintenance, and inactive blocks as blocking, saved blocks prevent new public bookings and admin manual
 reservations for matching windows. Deleting a block removes only that block; reservations and payments are not mutated.
+
+## Availability calendar
+
+`lib/admin-dashboard/calendar.ts` is the server-side helper for the `/admin/calendar` schedule view.
+
+The calendar page reads an optional `month=YYYY-MM` query parameter, falls back to the current UTC month, and provides
+previous/current/next month links. It queries records overlapping the month window and renders both a calendar grid and a
+schedule table:
+- reservations in `pending`, `confirmed`, or `completed` status, with links back to `/admin/reservations?search=<ref>`;
+- availability blocks in `reserved`, `maintenance`, or `inactive` status, with links back to `/admin/availability`.
+
+Each day receives an MVP availability indicator: `open` when no blocking event overlaps the day, `partial` when one
+blocking event overlaps, and `unavailable` when multiple blocking events overlap. Cancelled/failed/refunded reservations
+are excluded from the calendar query and do not create unavailable indicators.
 
 ## Related context
 
