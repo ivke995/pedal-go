@@ -98,12 +98,16 @@ Implement the authenticated administrator experience for PedalGo MVP: `/admin/lo
   - Evidence: `pnpm test` passed (43 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed.
   - Notes: Added protected admin availability block creation/update/delete for active bike types or specific bikes, reason/status/note display, reservation and block conflict checks, and tests confirming saved blocks make matching booking windows unavailable through the shared availability service.
 
-- [ ] T08: `Add availability calendar view` (status:todo)
+- [x] T08: `Add availability calendar view` (status:done)
   - Task ID: T08
   - Goal: Provide a calendar-oriented admin view of reservations, rentals, and maintenance blocks.
   - Boundaries (in/out of scope): In - calendar/list hybrid if simpler, date navigation, visual status indicators. Out - complex drag-and-drop scheduling unless already trivial with existing UI.
   - Done when: Admins can see booked/unavailable periods and identify availability gaps for the MVP inventory.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; inspect calendar with seeded reservations and maintenance blocks.
+  - Completed: 2026-07-16
+  - Files changed: `lib/admin-dashboard/calendar.ts`, `app/admin/(dashboard)/calendar/page.tsx`, `tests/admin-dashboard/calendar.test.ts`
+  - Evidence: `pnpm test tests/admin-dashboard/calendar.test.ts` passed (45 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed.
+  - Notes: Added protected month-navigation calendar/list hybrid for reservation and availability-block visibility with visual open/partial/unavailable day indicators.
 
 - [ ] T09: `Repair durable context for admin dashboard` (status:todo)
   - Task ID: T09
