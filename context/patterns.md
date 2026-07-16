@@ -25,6 +25,7 @@
 - Keep Stripe webhook handling in `app/api/stripe/webhook/route.ts` and `lib/public-booking/webhooks.ts`; verify signatures against the raw request body and never confirm reservations from client-side success/cancel navigation.
 - Keep booking confirmation email creation/sending in `lib/public-booking/confirmation-email.ts` and trigger it only from webhook-confirmed reservation transitions, not from client-side success/cancel pages.
 - Keep admin authentication server-only in `lib/admin-auth/`; admin route groups under `app/admin/(dashboard)/` should use the protected layout rather than client-side access checks.
+- Keep admin dashboard database reads server-only in `lib/admin-dashboard/`; protected admin pages should import those query helpers rather than importing the database client into client components.
 - Keep only client-safe static display fixtures in `lib/mock-data.ts`; public booking availability, reservation, payment, and status behavior must use database-backed server paths.
 - Keep database connection code under `lib/db/`; do not import the database client into client components.
 - Keep Drizzle tables, relations, status constants, indexes, and database check constraints in `lib/db/schema.ts`.
