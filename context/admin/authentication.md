@@ -6,7 +6,7 @@ PedalGo has a database-backed MVP administrator sign-in flow for `/admin` routes
 
 - `app/admin/(auth)/login/page.tsx` renders `/admin/login`.
 - `app/admin/(auth)/login/actions.ts` submits admin credentials through a server action.
-- `app/admin/(dashboard)/layout.tsx` protects authenticated admin dashboard routes with `requireAuthenticatedAdmin()`.
+- `app/admin/(dashboard)/layout.tsx` protects authenticated admin dashboard routes with `requireAuthenticatedAdmin()` and renders the shared admin dashboard navigation/logout shell.
 - `app/admin/actions.ts` exposes admin logout.
 - `lib/admin-auth/` contains password verification, signed session-cookie handling, and active-admin lookup.
 
@@ -24,4 +24,4 @@ PedalGo has a database-backed MVP administrator sign-in flow for `/admin` routes
 
 `requireAuthenticatedAdmin()` validates the signed cookie, re-checks that the referenced admin user still exists and is active, and redirects unauthenticated or inactive users to `/admin/login`.
 
-Future admin dashboard sections should live under the protected `app/admin/(dashboard)/` route group unless they are public admin-auth entry points.
+Admin dashboard sections live under the protected `app/admin/(dashboard)/` route group unless they are public admin-auth entry points.
