@@ -19,7 +19,7 @@ The homepage booking form checks the featured MVP rental option against database
 
 ## Capacity rules
 
-- Availability excludes overlapping `pending` and `confirmed` reservations so newly created pending payment reservations hold capacity before Stripe checkout is implemented.
+- Availability excludes overlapping `pending` and `confirmed` reservations so newly created pending payment reservations hold capacity before Stripe Checkout completes.
 
 ## Tests
 

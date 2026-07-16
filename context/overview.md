@@ -16,7 +16,7 @@ Current backend foundation:
 - `lib/admin-auth/` contains server-only active-admin credential verification, PBKDF2 password hash verification, and signed HTTP-only admin session-cookie handling.
 - `lib/admin-dashboard/` contains server-side admin operations summary, reservation listing, manual reservation creation, reservation cancellation, pricing management, availability-block management, and calendar helpers for the protected dashboard.
 - `scripts/seed.ts` seeds the MVP city-bike inventory and a bootstrap admin user for local/libSQL environments.
-- Server-side pricing helpers, database money fields, seed output, README seed docs, current UI display helpers, and active future implementation plans use USD terminology. Database-backed money values are stored as USD cents; remaining static featured-bike display data uses USD UI pricing helpers, while public availability/reservation/payment paths use database-backed pricing.
+- Server-side pricing helpers, database money fields, seed output, README seed docs, and current UI display helpers use USD terminology. Database-backed money values are stored as USD cents; remaining static featured-bike display data uses USD UI pricing helpers, while public availability/reservation/payment paths use database-backed pricing.
 
 Known project metadata:
 - Package name: `my-project`.
