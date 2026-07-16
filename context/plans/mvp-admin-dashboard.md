@@ -32,12 +32,16 @@ Implement the authenticated administrator experience for PedalGo MVP: `/admin/lo
   - Evidence: `pnpm lint` passed; `pnpm build` passed.
   - Notes: Added database-backed active-admin credential verification, PBKDF2 seeded password hash verification, signed HTTP-only admin session cookie, `/admin/login`, protected `/admin`, and logout action.
 
-- [ ] T02: `Create admin dashboard shell and navigation` (status:todo)
+- [x] T02: `Create admin dashboard shell and navigation` (status:done)
   - Task ID: T02
   - Goal: Build the authenticated admin layout with dashboard navigation for reservations, pricing, availability, calendar, and reports/summary.
   - Boundaries (in/out of scope): In - layout, navigation, route structure, high-level summary cards. Out - full CRUD behaviors for each section.
   - Done when: Authenticated admins can navigate between dashboard sections and see core operational metrics or placeholders backed by real query boundaries.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; manually inspect admin routes.
+  - Completed: 2026-07-16
+  - Files changed: `app/admin/(dashboard)/layout.tsx`, `app/admin/(dashboard)/page.tsx`, `app/admin/(dashboard)/reservations/page.tsx`, `app/admin/(dashboard)/pricing/page.tsx`, `app/admin/(dashboard)/availability/page.tsx`, `app/admin/(dashboard)/calendar/page.tsx`, `app/admin/(dashboard)/reports/page.tsx`, `lib/admin-dashboard/summary.ts`
+  - Evidence: `pnpm lint` passed; `pnpm build` passed; `pnpm exec tsc --noEmit` passed.
+  - Notes: Added shared protected admin navigation, section route placeholders, and database-backed summary metrics for reservations, payments, inventory, availability blocks, and confirmed revenue.
 
 - [ ] T03: `Implement reservation list and search` (status:todo)
   - Task ID: T03
