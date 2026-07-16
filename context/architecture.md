@@ -7,6 +7,8 @@
   - `app/page.tsx` composes the public landing page.
   - `app/booking/page.tsx` hosts the booking flow inside `Suspense`.
   - `app/booking/success/page.tsx` and `app/booking/cancel/page.tsx` render read-only post-Stripe customer status messaging.
+  - `app/admin/(auth)/login/` renders `/admin/login` and submits admin credentials through a server action.
+  - `app/admin/(dashboard)/` contains the protected admin dashboard shell; its layout redirects unauthenticated users to `/admin/login`.
   - `app/api/stripe/webhook/route.ts` verifies Stripe webhook signatures from the raw request body before applying payment/reservation state changes.
   - `app/layout.tsx` defines metadata, fonts, analytics, and global toaster.
 - `components/` — reusable React components.
@@ -15,6 +17,7 @@
   - `components/ui/` contains shadcn/Base UI-style primitives.
 - `lib/` — shared utilities, domain types, static featured-bike display data, pricing logic, domain services, and database boundary.
   - `lib/db/` contains Turso/libSQL env validation, the Drizzle client, and rental domain schema.
+  - `lib/admin-auth/` contains server-only active-admin lookup, seeded PBKDF2 password hash verification, signed admin session-cookie handling, and route guard helpers.
   - `lib/domain/` contains server-side rental pricing, date-range, and availability services for database-backed flows.
   - `lib/public-booking/` contains public booking orchestration that adapts server-side availability, pending-reservation, Stripe Checkout, post-checkout status lookup, Stripe webhook, and Resend confirmation-email behavior for UI-safe/server-route boundaries.
 - `public/` — static assets.
@@ -35,6 +38,7 @@ The database foundation is integrated into public availability, pending reservat
 - `lib/domain/availability.ts` looks up active bike-type inventory and excludes unavailable bikes, pending or confirmed reservation conflicts, unassigned pending/confirmed reservation capacity, and reserved/maintenance/inactive availability blocks.
 - `TURSO_DATABASE_URL` is required. `TURSO_AUTH_TOKEN` is required for remote Turso/libSQL URLs and omitted for local `file:` URLs. Stripe Checkout/webhook handling requires `STRIPE_SECRET_KEY`; webhook verification also requires `STRIPE_WEBHOOK_SECRET`. Resend confirmation email delivery requires `RESEND_API_KEY` and a verified `RESEND_FROM_EMAIL`. `NEXT_PUBLIC_APP_URL` or `APP_URL` sets Checkout success/cancel URL origins and defaults to `http://localhost:3000`. Database commands load `.env.local` and `.env` automatically.
 - `pnpm db:seed` creates the MVP `PedalGo City Bike` bike type, `CITY-001`/`CITY-002` physical bikes, and a bootstrap admin user. It requires `ADMIN_BOOTSTRAP_PASSWORD` and defaults admin email/name when not supplied.
+- `/admin/login` verifies credentials against active `admin_users`, then sets an 8-hour signed HTTP-only `pedalgo_admin_session` cookie scoped to `/admin`; production session signing requires `ADMIN_SESSION_SECRET`.
 - The current schema includes `bike_types`, `bikes`, `reservations`, `payments`, `availability_blocks`, and `admin_users` with foreign keys, indexes, timestamp fields, status check constraints, and USD-cent money columns (`*_usd_cents`).
 - The public availability quote targets seeded bike type `bike-type-mvp-city-bike`, returns rental days and USD totals, and does not create reservations or checkout sessions.
 - Pending public reservations target the same featured bike type, store customer details and USD totals, assign one available physical bike as the hold strategy when possible, and write hold-expiry metadata into reservation `notes`.
