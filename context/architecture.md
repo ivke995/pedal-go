@@ -26,6 +26,7 @@
 - `drizzle.config.ts` — Drizzle Kit configuration for Turso/libSQL migrations.
 - `drizzle/` — generated Drizzle migration metadata/output.
 - `tests/domain/` — Node test-runner unit tests for server-side pricing, date-range, and availability domain behavior.
+- `tests/admin-dashboard/` — Node test-runner tests for admin dashboard server-side orchestration.
 - `tests/public-booking/` — Node test-runner tests for public booking server-side orchestration.
 
 ## Data and backend state

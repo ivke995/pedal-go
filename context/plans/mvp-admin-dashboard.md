@@ -109,12 +109,16 @@ Implement the authenticated administrator experience for PedalGo MVP: `/admin/lo
   - Evidence: `pnpm test tests/admin-dashboard/calendar.test.ts` passed (45 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed.
   - Notes: Added protected month-navigation calendar/list hybrid for reservation and availability-block visibility with visual open/partial/unavailable day indicators.
 
-- [ ] T09: `Repair durable context for admin dashboard` (status:todo)
+- [x] T09: `Repair durable context for admin dashboard` (status:done)
   - Task ID: T09
   - Goal: Update SCE context with current admin routes, auth model, and operational dashboard boundaries.
   - Boundaries (in/out of scope): In - current-state context updates and any durable admin-auth decisions. Out - implementation diary.
   - Done when: Future sessions can find admin auth/dashboard code paths and understand MVP admin capabilities from context.
   - Verification notes (commands or checks): Read context files and confirm they align with implemented admin code.
+  - Completed: 2026-07-16
+  - Files changed: `context/admin/authentication.md`, `context/architecture.md`, `context/plans/mvp-admin-dashboard.md`
+  - Evidence: Read `context/admin/authentication.md`, `context/admin/dashboard.md`, `context/architecture.md`, `context/patterns.md`, admin route files under `app/admin/`, and admin server boundaries under `lib/admin-auth/` and `lib/admin-dashboard/`; durable context aligns with implemented admin routes/auth/dashboard capabilities.
+  - Notes: Repaired current-state context landmarks for admin login form UI and admin dashboard test coverage; existing admin auth/dashboard context already matched implemented MVP boundaries.
 
 - [ ] T10: `Validate and clean up admin work` (status:todo)
   - Task ID: T10
