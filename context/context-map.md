@@ -14,6 +14,8 @@ Use this file first to find relevant durable context before changing code.
 - `context/public-booking/availability.md` — Homepage availability quote flow, server action boundary, and no-side-effect booking entry behavior.
 - `context/public-booking/reservations.md` — Customer details submission, pending reservation creation, and assigned-bike hold strategy.
 - `context/public-booking/payments.md` — Stripe Checkout creation, pending payment records, metadata contract, webhook-only reservation confirmation, Resend confirmation email trigger, and failed/expired payment handling.
+- `context/decisions/pedalgo-mvp-architecture-product.md` — Accepted MVP product, architecture, provider, status, and non-goal decisions.
+- `README.md` — Human-facing setup and deployment environment contract for Turso/libSQL, Stripe, Resend, admin bootstrap/session secrets, public URL origins, local development, and deployment checklist.
 
 ## Working artifacts
 
@@ -51,3 +53,4 @@ Use this file first to find relevant durable context before changing code.
 - `tests/public-booking/status.test.ts` — Unit tests for read-only public booking status classification and lookup.
 - `drizzle.config.ts` — Drizzle Kit migration configuration.
 - `drizzle/` — Generated Drizzle migration metadata/output.
+- `README.md` — Canonical deployment/local setup document for required and optional environment variables.

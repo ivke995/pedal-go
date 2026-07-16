@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for MVP planning; current implemented booking/payment behavior is summarized in `context/public-booking/`.
+Accepted for the MVP release state; current implemented booking/payment behavior is summarized in `context/public-booking/` and admin behavior in `context/admin/`.
 
 ## Decision
 

@@ -32,6 +32,7 @@
 - Use USD-cent names for database-backed money columns and server-side pricing fields (`*_usd_cents` / `*UsdCents`).
 - Generate migrations with `pnpm db:generate` using `TURSO_DATABASE_URL`.
 - Keep MVP seed data in `scripts/seed.ts`; seeds should be idempotent, avoid committed secrets, and require explicit bootstrap credentials through environment variables loaded from the shell, `.env.local`, or `.env`.
+- Keep deployment/local setup instructions and the full environment variable contract in `README.md` whenever runtime config requirements change.
 - Cover server-side domain behavior with Node test-runner tests under `tests/domain/`; cover admin dashboard orchestration under `tests/admin-dashboard/`; cover public booking orchestration under `tests/public-booking/`; run them with `pnpm test`.
 - Keep database foundation details in `context/database/foundation.md`; core context should summarize and link rather than duplicate the full schema.
 

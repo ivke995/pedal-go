@@ -53,7 +53,7 @@ Database commands and scripts load `.env.local` and `.env` automatically without
 
 ## Commands
 
-- `pnpm test` — run domain unit tests.
+- `pnpm test` — run server-side domain, public-booking, and admin-dashboard unit tests.
 - `TURSO_DATABASE_URL=file:./local.db pnpm db:generate` — generate migrations from the schema.
 - `TURSO_DATABASE_URL=file:./local.db pnpm db:check` — validate generated migrations.
 - `TURSO_DATABASE_URL=file:./local.db pnpm db:migrate` — apply migrations to the configured database.

@@ -26,4 +26,5 @@
 - **Turso** — Hosted libSQL database provider used for PedalGo database environments.
 - **libSQL** — SQLite-compatible database engine/client used by PedalGo through `@libsql/client`.
 - **Drizzle ORM** — TypeScript ORM and migration tooling used for PedalGo database schema and queries.
+- **Deployment environment contract** — The canonical `README.md` section listing required/optional Turso, Stripe, Resend, admin, public URL, and PedalGo contact-copy variables plus local/deployment setup checklist.
 - **SCE** — Shared Context Engineering: durable AI-first project memory stored under `context/`.

@@ -12,7 +12,7 @@ PedalGo has a protected MVP administrator dashboard under `app/admin/(dashboard)
 - `app/admin/(dashboard)/calendar/page.tsx` renders the month-navigation availability calendar/list hybrid.
 - `app/admin/(dashboard)/reports/page.tsx` establishes the reporting route boundary.
 
-Reports is currently a server-rendered protected placeholder unless noted otherwise. Automated payment/refund handling remains out of scope.
+Reports is currently a protected MVP section boundary without a reporting workflow. Automated payment/refund handling remains out of scope.
 
 ## Summary metrics
 
