@@ -7,6 +7,7 @@ import { requireAuthenticatedAdmin } from "@/lib/admin-auth/auth";
 import { cancelReservation } from "@/lib/admin-dashboard/cancellations";
 import { clearAdminSession } from "@/lib/admin-auth/session";
 import { createManualReservation } from "@/lib/admin-dashboard/manual-reservations";
+import { updateBikeTypeDailyPrice } from "@/lib/admin-dashboard/pricing";
 
 export async function logoutAdmin(): Promise<void> {
   await clearAdminSession();
@@ -51,4 +52,23 @@ export async function cancelReservationAction(formData: FormData): Promise<void>
   }
 
   redirect(`/admin/reservations?cancelError=${encodeURIComponent(result.message)}`);
+}
+
+export async function updateBikeTypeDailyPriceAction(formData: FormData): Promise<void> {
+  await requireAuthenticatedAdmin();
+
+  const result = await updateBikeTypeDailyPrice({
+    bikeTypeId: String(formData.get("bikeTypeId") ?? ""),
+    dailyRateUsd: String(formData.get("dailyRateUsd") ?? ""),
+  });
+
+  revalidatePath("/admin/pricing");
+  revalidatePath("/");
+  revalidatePath("/booking");
+
+  if (result.status === "updated") {
+    redirect(`/admin/pricing?updated=${encodeURIComponent(result.bikeType.name)}`);
+  }
+
+  redirect(`/admin/pricing?priceError=${encodeURIComponent(result.message)}`);
 }

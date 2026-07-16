@@ -76,12 +76,16 @@ Implement the authenticated administrator experience for PedalGo MVP: `/admin/lo
   - Evidence: `pnpm test tests/admin-dashboard/cancellations.test.ts` passed (35 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed.
   - Notes: Added protected admin cancellation action for pending/confirmed reservations, invalid-transition blocking for terminal statuses, cancellation metadata in reservation notes, and per-row admin cancellation controls while preserving existing payment records/status display. Cancelled reservations are non-blocking through existing availability status rules.
 
-- [ ] T06: `Implement pricing management` (status:todo)
+- [x] T06: `Implement pricing management` (status:done)
   - Task ID: T06
   - Goal: Allow admins to update the featured rental daily price in USD while preserving future bike-type extensibility.
   - Boundaries (in/out of scope): In - edit daily price for active bike type, validation, audit-friendly updated timestamps. Out - hourly/weekend/seasonal pricing, discounts, coupon codes.
   - Done when: Updated pricing affects new availability/booking calculations and does not mutate historical paid reservation totals.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; update price and confirm new booking quote changes while existing reservation total remains unchanged.
+  - Completed: 2026-07-16
+  - Files changed: `lib/admin-dashboard/pricing.ts`, `app/admin/actions.ts`, `app/admin/(dashboard)/pricing/page.tsx`, `tests/admin-dashboard/pricing.test.ts`
+  - Evidence: `pnpm test` passed (38 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed.
+  - Notes: Added protected admin pricing management for active bike types with USD validation, daily-rate updates on `bike_types`, updated timestamp writes, and tests confirming only bike-type pricing changes while existing reservation totals remain unchanged. Existing availability/manual/public booking quote paths read current bike-type rates for new calculations.
 
 - [ ] T07: `Implement availability blocks and maintenance management` (status:todo)
   - Task ID: T07
