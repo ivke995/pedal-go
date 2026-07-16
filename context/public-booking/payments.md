@@ -11,7 +11,7 @@ The `/booking` payment step creates a Stripe Checkout Session for an existing pe
 - `app/booking/success/page.tsx` looks up status by `session_id` and displays processing, confirmed, failed, or cancelled messaging without mutating reservation/payment state.
 - `app/booking/cancel/page.tsx` looks up status by reservation reference and explains no reservation is confirmed unless a later Stripe webhook succeeds.
 - `lib/public-booking/status.ts` performs read-only lookup by Checkout Session id or reservation reference and returns a UI-safe status summary.
-- `lib/public-booking/webhooks.ts` applies idempotent payment and reservation state transitions for successful, failed, and expired Stripe payment paths, and triggers confirmation email sending when a pending reservation becomes confirmed.
+- `lib/public-booking/webhooks.ts` applies idempotent payment and reservation state transitions for successful, failed, and expired Stripe payment paths, and sends the confirmation email before transitioning a pending reservation to confirmed.
 - `lib/public-booking/confirmation-email.ts` builds the customer confirmation email and sends it through Resend.
 - `tests/public-booking/checkout.test.ts` covers pending payment insertion, session parameters, metadata, URL configuration, and non-pending reservation rejection.
 - `tests/public-booking/webhooks.test.ts` covers successful confirmation and email content, duplicate webhook no-resend behavior, failed/expired payment handling, and invalid-signature route rejection.
@@ -35,13 +35,14 @@ The `/booking` payment step creates a Stripe Checkout Session for an existing pe
 - `checkout.session.completed` is handled only when `payment_status` is `paid`.
 - The handler locates the existing `payments` row by Checkout Session metadata `paymentId`, with `providerCheckoutId` as fallback for Checkout Session events.
 - Paid sessions must match the stored `amountUsdCents`; mismatched amounts are ignored rather than confirming a reservation.
-- Successful paid checkout updates the payment to `status: 'confirmed'`, records `providerPaymentId`/`paidAt`, changes the reservation from `pending` to `confirmed`, and sends the customer confirmation email.
+- Successful paid checkout updates the payment to `status: 'confirmed'`, records `providerPaymentId`/`paidAt`, sends the customer confirmation email while the reservation is still `pending`, and then changes the reservation to `confirmed` after the email send succeeds.
+- If confirmation email sending fails for a pending reservation, the webhook request fails so Stripe can retry; the payment confirmation remains recorded, but the reservation is not moved to `confirmed` by that failed attempt.
 - `checkout.session.expired` and `payment_intent.payment_failed` update the payment to `failed`; if the linked reservation is still `pending`, it becomes `failed`.
 - Duplicate successful webhook deliveries are safe: already-confirmed reservations are not transitioned again, no duplicate confirmation email is sent, and payment updates are idempotent overwrites.
 
 ## Confirmation email
 
-- Confirmation email delivery uses Resend and is invoked only after a paid Checkout Session webhook confirms a reservation that was still `pending`.
+- Confirmation email delivery uses Resend and is invoked only from a paid Checkout Session webhook for a reservation that is still `pending`; the reservation is marked `confirmed` only after the email send succeeds.
 - The email includes reservation reference, pickup/return date-time, total paid, pickup location, support contact details, support hours, and pickup instructions.
 - Default pickup/contact copy matches the public site; environment variables can override the email copy without changing code.
 - Client-side success/cancel pages do not send confirmation emails.
