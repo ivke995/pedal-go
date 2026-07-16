@@ -15,6 +15,7 @@
 - **Bootstrap admin** — Initial active admin user created by `pnpm db:seed`; credentials are supplied through seed environment variables rather than committed to the repository.
 - **Admin session** — Signed HTTP-only cookie named `pedalgo_admin_session` that grants active administrators access to `/admin` routes for the current MVP session window.
 - **Admin dashboard shell** — Protected `/admin` route group with shared admin header, logout, navigation, section routes, and database-backed operations summary metrics.
+- **Admin reservation list** — Protected `/admin/reservations` view backed by `lib/admin-dashboard/reservations.ts`; supports reservation/customer search, reservation status filtering, and payment status visibility without mutation workflows.
 - **Rental day** — Current pricing rule: every started 24-hour period counts as one full rental day.
 - **USD** — Current pricing display, quote, and storage currency. UI helpers format USD; server-side pricing helpers and database money fields use USD-cent naming.
 - **Turso** — Hosted libSQL database provider used for PedalGo database environments.

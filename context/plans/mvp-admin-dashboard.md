@@ -43,12 +43,16 @@ Implement the authenticated administrator experience for PedalGo MVP: `/admin/lo
   - Evidence: `pnpm lint` passed; `pnpm build` passed; `pnpm exec tsc --noEmit` passed.
   - Notes: Added shared protected admin navigation, section route placeholders, and database-backed summary metrics for reservations, payments, inventory, availability blocks, and confirmed revenue.
 
-- [ ] T03: `Implement reservation list and search` (status:todo)
+- [x] T03: `Implement reservation list and search` (status:done)
   - Task ID: T03
   - Goal: Show all reservations in one place with search/filter support and payment status visibility.
   - Boundaries (in/out of scope): In - list/table, search by reservation/customer fields, status filters, payment status display. Out - manual creation and cancellation mutations.
   - Done when: Admins can locate reservations and understand reservation/payment state from a single view.
   - Verification notes (commands or checks): `pnpm lint`; `pnpm build`; test search/filter combinations against seeded and payment-created records.
+  - Completed: 2026-07-16
+  - Files changed: `lib/admin-dashboard/reservations.ts`, `app/admin/(dashboard)/reservations/page.tsx`
+  - Evidence: `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed; `pnpm test` passed (29 tests).
+  - Notes: Added server-only reservation listing/search/filter query boundary and protected admin table with reservation status, payment status, customer, rental window, assignment, and total display. Manual creation and cancellation remain out of scope.
 
 - [ ] T04: `Add manual reservation creation` (status:todo)
   - Task ID: T04
