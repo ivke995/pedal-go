@@ -20,12 +20,15 @@ Perform cross-cutting validation after the foundation, public booking/payment, a
 
 ## Task stack
 
-- [ ] T01: `Verify clean database setup` (status:todo)
+- [x] T01: `Verify clean database setup` (status:done)
   - Task ID: T01
   - Goal: Confirm migrations and seed data work on a fresh Turso/libSQL development database.
   - Boundaries (in/out of scope): In - migration apply, seed run, baseline data inspection. Out - schema redesign unless validation exposes a blocking defect.
   - Done when: A clean database can be prepared without manual SQL and contains the MVP bike type, inventory, pricing, and admin bootstrap data.
   - Verification notes (commands or checks): Run migration and seed workflow; inspect expected records through app/admin UI or Drizzle query tooling.
+  - Completed: 2026-07-16
+  - Evidence: Against disposable local libSQL database `file:context/tmp/release-validation-t01.sqlite`, `TURSO_DATABASE_URL="file:context/tmp/release-validation-t01.sqlite" pnpm db:migrate` applied migrations successfully; `pnpm db:seed` with local bootstrap admin env completed and printed `PedalGo City Bike (2500 USD cents/day)`, `CITY-001, CITY-002`, and `admin@pedalgo.local (active)`; Drizzle query inspection confirmed one active seeded bike type (`bike-type-mvp-city-bike` / `city-bike` / `dailyRateUsdCents: 2500`), two available bikes (`CITY-001`, `CITY-002`), and active bootstrap admin `admin-bootstrap`; `TURSO_DATABASE_URL="file:context/tmp/release-validation-t01.sqlite" pnpm db:check` returned `Everything's fine`.
+  - Notes: No application code or schema changes were needed; the failed first ad-hoc inspection command used unsupported top-level await in `tsx -e`, then succeeded with an async IIFE.
 
 - [ ] T02: `Run customer booking end-to-end test` (status:todo)
   - Task ID: T02
