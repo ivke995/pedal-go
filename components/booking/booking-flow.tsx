@@ -3,20 +3,17 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
-import { createPendingReservationAction } from '@/app/actions/create-pending-reservation'
 import { Button } from '@/components/ui/button'
 import { BookingSummary } from '@/components/booking/booking-summary'
 import {
   CustomerDetailsForm,
   type CustomerDetails,
 } from '@/components/booking/customer-details-form'
-import { PaymentPreview } from '@/components/booking/payment-preview'
+import { PaymentMethodForm } from '@/components/booking/payment-method-form'
+import { ReservationConfirmation } from '@/components/booking/reservation-confirmation'
 import { calculateRentalDays, calculateTotal, DAILY_RATE } from '@/lib/pricing'
 import type { BookingDraft } from '@/lib/types'
-import type {
-  PendingReservationFieldErrors,
-  PendingReservationSummary,
-} from '@/lib/public-booking/reservations'
+import type { PendingReservationSummary } from '@/lib/public-booking/reservations'
 
 type Step = 'details' | 'payment'
 
@@ -35,9 +32,7 @@ export function BookingFlow() {
   const [customer, setCustomer] = useState<CustomerDetails | null>(null)
   const [pendingReservation, setPendingReservation] =
     useState<PendingReservationSummary | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [serverErrors, setServerErrors] = useState<PendingReservationFieldErrors>({})
-  const [serverMessage, setServerMessage] = useState<string | null>(null)
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
 
   const searchDraft = useMemo<BookingDraft>(() => {
     const fallback = fallbackRange()
@@ -56,32 +51,8 @@ export function BookingFlow() {
 
   const draft = pendingReservation?.draft ?? searchDraft
 
-  async function handleDetailsSubmit(details: CustomerDetails) {
-    setIsSubmitting(true)
-    setServerErrors({})
-    setServerMessage(null)
-
-    const result = await createPendingReservationAction({
-      ...details,
-      pickupAt: searchDraft.pickupAt,
-      returnAt: searchDraft.returnAt,
-    })
-
-    setIsSubmitting(false)
-
-    if (result.status === 'error') {
-      setServerErrors(result.fieldErrors)
-      setServerMessage(result.message)
-      return
-    }
-
-    if (result.status === 'unavailable') {
-      setServerMessage(result.message)
-      return
-    }
-
+  function handleDetailsSubmit(details: CustomerDetails) {
     setCustomer(details)
-    setPendingReservation(result.reservation)
     setStep('payment')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -91,7 +62,11 @@ export function BookingFlow() {
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-            {step === 'details' ? 'Your details' : 'Review & pay'}
+            {step === 'details'
+              ? 'Your details'
+              : pendingReservation
+                ? 'Reservation received'
+                : 'Payment method'}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Step {step === 'details' ? '1' : '2'} of 2
@@ -113,16 +88,23 @@ export function BookingFlow() {
             <CustomerDetailsForm
               defaultValues={customer ?? undefined}
               onSubmit={handleDetailsSubmit}
-              isSubmitting={isSubmitting}
-              serverErrors={serverErrors}
-              serverMessage={serverMessage}
+            />
+          ) : pendingReservation ? (
+            <ReservationConfirmation
+              customer={customer!}
+              reservation={pendingReservation}
+              notificationMessage={notificationMessage}
             />
           ) : (
-            <PaymentPreview
+            <PaymentMethodForm
               draft={draft}
               customer={customer!}
-              reservation={pendingReservation!}
               onBack={() => setStep('details')}
+              onSuccess={(reservation, message) => {
+                setPendingReservation(reservation)
+                setNotificationMessage(message ?? null)
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
             />
           )}
         </div>

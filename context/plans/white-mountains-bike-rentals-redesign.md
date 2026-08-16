@@ -81,19 +81,27 @@ Replace the Stripe/payment-provider flow completely with a manual external-payme
    - Evidence: `pnpm test` passed (37 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed; `TURSO_DATABASE_URL=file:./local.db pnpm db:check` passed; migration applied successfully to local `file:./local.db`.
    - Notes: Legacy `pending` reservations migrate to `pending_verification`; provider-facing modules remain fail-closed transitional boundaries for T03/T05 cleanup.
 
-- [ ] T02: `Add manual payment instructions and reservation notifications` (status:todo)
+- [x] T02: `Add manual payment instructions and reservation notifications` (status:done)
   - Task ID: T02
   - Goal: Implement the server-side reservation submission contract for Venmo/Zelle instructions and Resend notifications.
   - Boundaries (in/out of scope): In — validate `venmo`/`zelle`; load `VENMO_HANDLE`, `ZELLE_RECIPIENT`, `OWNER_NOTIFICATION_EMAIL`, and `EMAIL_FROM` server-side; return only the selected method's recipient/instructions and exact amount; build/send customer reservation-received and owner notification messages through the existing Resend infrastructure; include explicit pending-manual-verification wording; define failure behavior so a saved reservation cannot be represented as confirmed. Out — automated verification, provider APIs, frontend selection controls, and admin verification UI.
-  - Done when: A valid submission creates a manual-verification reservation with method and amount, customer and owner messages contain the required reservation/payment details, secrets/owner-only values stay server-side, missing config produces a safe actionable error, and no message says payment is confirmed or paid.
-  - Verification notes (commands or checks): Add focused unit tests with an injected email sender and fake env/config; assert method-specific instructions, exact totals, HTML escaping, recipient separation, missing-config errors, and pending status; run the public-booking tests.
+   - Done when: A valid submission creates a manual-verification reservation with method and amount, customer and owner messages contain the required reservation/payment details, secrets/owner-only values stay server-side, missing config produces a safe actionable error, and no message says payment is confirmed or paid.
+   - Verification notes (commands or checks): Add focused unit tests with an injected email sender and fake env/config; assert method-specific instructions, exact totals, HTML escaping, recipient separation, missing-config errors, and pending status; run the public-booking tests.
+   - Completed: 2026-08-16
+   - Files changed: `app/actions/create-pending-reservation.ts`, `lib/public-booking/reservations.ts`, `lib/public-booking/confirmation-email.ts`, `tests/public-booking/reservations.test.ts`, and `tests/public-booking/notifications.test.ts`
+   - Evidence: Focused public-booking tests passed (13 tests); full `pnpm test` passed (39 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed. Missing payment configuration returns a safe error before insert; notification failure preserves `pending_verification` status.
+   - Notes: The server action injects the Resend sender. Customer-safe results include only the selected method's recipient/instructions and exact amount; owner recipient and sender configuration remain server-side. Existing provider artifacts remain for T05 cleanup.
 
-- [ ] T03: `Replace booking checkout with Venmo/Zelle submission flow` (status:todo)
+- [x] T03: `Replace booking checkout with Venmo/Zelle submission flow` (status:done)
   - Task ID: T03
   - Goal: Make the customer booking experience collect a payment method, submit once, and show external-payment instructions and reservation confirmation in the existing booking route.
   - Boundaries (in/out of scope): In — update customer details/form types, add accessible Venmo/Zelle selection, call the reservation action with the method, replace `PaymentPreview` with a confirmation/instructions view, show exact amount and `Payment pending manual confirmation`, provide reservation reference and next steps, prevent a false paid claim, and remove provider success/cancel navigation. Out — homepage visual redesign, admin verification controls, and mail/database internals beyond consuming T01/T02 contracts.
-  - Done when: Mobile and desktop users can complete details → method selection → submission; selected-method instructions are shown without leaking the other method or owner config; loading/error/retry states are clear; the booking summary consistently shows $48/day; no Stripe language or dead CTA remains.
-  - Verification notes (commands or checks): Exercise client validation and action-result states; run lint/type/build checks for booking components; manually verify keyboard operation, focus/error announcements, touch targets, and narrow viewport layout.
+   - Done when: Mobile and desktop users can complete details → method selection → submission; selected-method instructions are shown without leaking the other method or owner config; loading/error/retry states are clear; the booking summary consistently shows $48/day; no Stripe language or dead CTA remains.
+   - Verification notes (commands or checks): Exercise client validation and action-result states; run lint/type/build checks for booking components; manually verify keyboard operation, focus/error announcements, touch targets, and narrow viewport layout.
+   - Completed: 2026-08-16
+   - Files changed: `components/booking/booking-flow.tsx`, `components/booking/customer-details-form.tsx`, `components/booking/payment-method-form.tsx`, `components/booking/reservation-confirmation.tsx`, `components/booking/payment-preview.tsx` (removed), and `lib/pricing.ts`
+   - Evidence: `pnpm test` passed (41 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed. Booking flow now submits only after method selection, returns selected-method instructions, and renders a pending manual-confirmation summary.
+   - Notes: The existing `/booking/success` and `/booking/cancel` provider-return routes remain transitional artifacts for T05 cleanup, but the active booking flow no longer links to or imports them.
 
 - [ ] T04: `Add owner-controlled manual reservation verification` (status:todo)
   - Task ID: T04

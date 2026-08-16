@@ -1,9 +1,14 @@
 import { randomUUID } from 'node:crypto'
 
-import { reservations } from '@/lib/db/schema'
+import { PAYMENT_METHODS, reservations, type PaymentMethod } from '@/lib/db/schema'
 import { getBikeAvailability } from '@/lib/domain/availability'
-import { CURRENT_DAILY_RATE_USD_CENTS, quoteRentalPrice } from '@/lib/domain/pricing'
+import { CURRENT_DAILY_RATE_USD_CENTS, formatUsdCents, quoteRentalPrice } from '@/lib/domain/pricing'
 import type { BookingDraft } from '@/lib/types'
+import {
+  buildReservationNotificationMessages,
+  createResendReservationEmailSender,
+  type ReservationEmailSender,
+} from './confirmation-email'
 import {
   FEATURED_BIKE_TYPE_ID,
   type AvailabilityQuoteInput,
@@ -17,6 +22,7 @@ export type CreatePendingReservationInput = AvailabilityQuoteInput & {
   fullName: string
   email: string
   phone: string
+  paymentMethod?: string
 }
 
 export type PendingReservationFieldErrors = {
@@ -25,6 +31,20 @@ export type PendingReservationFieldErrors = {
   fullName?: string
   email?: string
   phone?: string
+  paymentMethod?: string
+}
+
+export type ManualPaymentConfiguration = {
+  venmoHandle: string
+  zelleRecipient: string
+  ownerNotificationEmail: string
+  emailFrom: string
+}
+
+export type ManualPaymentInstructions = {
+  method: PaymentMethod
+  recipient: string
+  instructions: string
 }
 
 export type PendingReservationSummary = {
@@ -42,6 +62,8 @@ export type PendingReservationSummary = {
   dailyRateUsdCents: number
   totalUsdCents: number
   status: 'pending_verification'
+  paymentMethod: PaymentMethod
+  paymentInstructions: ManualPaymentInstructions
   holdExpiresAt: string
   draft: BookingDraft
 }
@@ -60,6 +82,11 @@ export type CreatePendingReservationResult =
       message: string
       fieldErrors: PendingReservationFieldErrors
     }
+  | {
+      status: 'notification_error'
+      message: string
+      reservation: PendingReservationSummary
+    }
 
 type ReservationDatabase = Parameters<typeof getBikeAvailability>[1] & {
   insert: (table: typeof reservations) => {
@@ -73,6 +100,48 @@ type CreatePendingReservationOptions = {
   now?: Date
   idFactory?: () => string
   referenceFactory?: (now: Date) => string
+  paymentConfig?: ManualPaymentConfiguration
+  emailSender?: ReservationEmailSender
+}
+
+function getRequiredConfiguration(name: string): string {
+  const value = process.env[name]?.trim()
+
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}.`)
+  }
+
+  return value
+}
+
+export function getManualPaymentConfiguration(): ManualPaymentConfiguration {
+  return {
+    venmoHandle: getRequiredConfiguration('VENMO_HANDLE'),
+    zelleRecipient: getRequiredConfiguration('ZELLE_RECIPIENT'),
+    ownerNotificationEmail: getRequiredConfiguration('OWNER_NOTIFICATION_EMAIL'),
+    emailFrom: getRequiredConfiguration('EMAIL_FROM'),
+  }
+}
+
+function isPaymentMethod(value: string | undefined): value is PaymentMethod {
+  return PAYMENT_METHODS.includes(value as PaymentMethod)
+}
+
+function getPaymentInstructions(
+  paymentMethod: PaymentMethod,
+  totalUsdCents: number,
+  reference: string,
+  configuration: ManualPaymentConfiguration,
+): ManualPaymentInstructions {
+  const amount = formatUsdCents(totalUsdCents)
+  const recipient = paymentMethod === 'venmo' ? configuration.venmoHandle : configuration.zelleRecipient
+  const methodLabel = paymentMethod === 'venmo' ? 'Venmo' : 'Zelle'
+
+  return {
+    method: paymentMethod,
+    recipient,
+    instructions: `Send ${amount} via ${methodLabel} to ${recipient}. Include reservation ${reference} in the payment note. Payment remains pending manual confirmation until the owner verifies the transaction.`,
+  }
 }
 
 function validateCustomerDetails(input: CreatePendingReservationInput): PendingReservationFieldErrors {
@@ -90,6 +159,10 @@ function validateCustomerDetails(input: CreatePendingReservationInput): PendingR
     fieldErrors.phone = 'Please enter a valid phone number.'
   }
 
+  if (!isPaymentMethod(input.paymentMethod)) {
+    fieldErrors.paymentMethod = 'Please choose Venmo or Zelle.'
+  }
+
   return fieldErrors
 }
 
@@ -104,6 +177,7 @@ function toPublicSummary(
   row: typeof reservations.$inferSelect,
   bikeName: string,
   holdExpiresAt: Date,
+  paymentInstructions: ManualPaymentInstructions,
 ): PendingReservationSummary {
   return {
     id: row.id,
@@ -120,6 +194,8 @@ function toPublicSummary(
     dailyRateUsdCents: row.dailyRateUsdCents,
     totalUsdCents: row.totalUsdCents,
     status: 'pending_verification',
+    paymentMethod: paymentInstructions.method,
+    paymentInstructions,
     holdExpiresAt: holdExpiresAt.toISOString(),
     draft: {
       pickupAt: row.pickupAt.toISOString(),
@@ -150,6 +226,22 @@ export async function createPendingReservation(
     }
   }
 
+  let paymentConfiguration: ManualPaymentConfiguration
+  let emailSender: ReservationEmailSender
+
+  try {
+    paymentConfiguration = options.paymentConfig ?? getManualPaymentConfiguration()
+    emailSender = options.emailSender ?? createResendReservationEmailSender()
+  } catch (error) {
+    console.error('Manual payment reservation configuration is incomplete', error)
+
+    return {
+      status: 'error',
+      message: 'Manual payment reservations are not configured yet. Please contact the rental team.',
+      fieldErrors: {},
+    }
+  }
+
   const availability = await getBikeAvailability(
     {
       bikeTypeId: FEATURED_BIKE_TYPE_ID,
@@ -172,6 +264,7 @@ export async function createPendingReservation(
     CURRENT_DAILY_RATE_USD_CENTS,
   )
   const now = options.now ?? new Date()
+  const paymentMethod = input.paymentMethod as PaymentMethod
   const holdExpiresAt = new Date(now.getTime() + HOLD_MINUTES * 60 * 1000)
   const selectedBike = availability.availableBikes[0] ?? null
   const [created] = await database
@@ -190,6 +283,7 @@ export async function createPendingReservation(
       dailyRateUsdCents: quote.dailyRateUsdCents,
       totalUsdCents: quote.totalUsdCents,
       status: 'pending_verification',
+      paymentMethod,
       notes: JSON.stringify({
         source: 'public_booking',
         holdStrategy: selectedBike ? 'assigned_bike' : 'capacity_hold',
@@ -200,8 +294,36 @@ export async function createPendingReservation(
     })
     .returning()
 
-  return {
-    status: 'created',
-    reservation: toPublicSummary(created, availability.bikeType.name, holdExpiresAt),
+  const paymentInstructions = getPaymentInstructions(
+    paymentMethod,
+    created.totalUsdCents,
+    created.reference,
+    paymentConfiguration,
+  )
+  const reservation = toPublicSummary(
+    created,
+    availability.bikeType.name,
+    holdExpiresAt,
+    paymentInstructions,
+  )
+  const messages = buildReservationNotificationMessages(
+    reservation,
+    paymentInstructions,
+    paymentConfiguration,
+  )
+
+  try {
+    await Promise.all([emailSender(messages.customer), emailSender(messages.owner)])
+  } catch (error) {
+    console.error('Unable to send manual payment reservation notifications', error)
+
+    return {
+      status: 'notification_error',
+      message:
+        'Your reservation was received and remains pending manual confirmation, but the notification emails could not be sent. Please contact the rental team with your reservation reference.',
+      reservation,
+    }
   }
+
+  return { status: 'created', reservation }
 }

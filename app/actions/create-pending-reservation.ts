@@ -10,11 +10,14 @@ export async function createPendingReservationAction(
   input: CreatePendingReservationInput,
 ): Promise<CreatePendingReservationResult> {
   try {
-    const { createPendingReservation } = await import(
-      '@/lib/public-booking/reservations'
-    )
+    const [{ createPendingReservation }, { createResendReservationEmailSender }] = await Promise.all([
+      import('@/lib/public-booking/reservations'),
+      import('@/lib/public-booking/confirmation-email'),
+    ])
 
-    return createPendingReservation(input, db)
+    return createPendingReservation(input, db, {
+      emailSender: createResendReservationEmailSender(),
+    })
   } catch (error) {
     console.error('Unable to create pending reservation', error)
 

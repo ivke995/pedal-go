@@ -1,7 +1,7 @@
 // Frontend-only pricing rules for the MVP.
-// Daily rate is 30 USD and every started 24-hour period counts as one rental day.
+// Daily rate is 48 USD and every started 24-hour period counts as one rental day.
 
-export const DAILY_RATE = 30
+export const DAILY_RATE = 48
 export const CURRENCY = 'USD'
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24
