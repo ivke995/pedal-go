@@ -42,7 +42,7 @@ export type AdminCalendarMonth = {
 
 type CalendarDatabase = typeof db;
 
-const BLOCKING_RESERVATION_STATUSES: ReservationStatus[] = ["pending", "confirmed"];
+const BLOCKING_RESERVATION_STATUSES: ReservationStatus[] = ["pending_verification", "confirmed"];
 
 function addDays(value: Date, days: number): Date {
   const next = new Date(value);
@@ -132,7 +132,11 @@ export async function getAdminCalendarMonth(
       .leftJoin(bikes, eq(reservations.bikeId, bikes.id))
       .where(
         and(
-          or(eq(reservations.status, "pending"), eq(reservations.status, "confirmed"), eq(reservations.status, "completed")),
+          or(
+            eq(reservations.status, "pending_verification"),
+            eq(reservations.status, "confirmed"),
+            eq(reservations.status, "completed"),
+          ),
           lt(reservations.pickupAt, monthEnd),
           gt(reservations.returnAt, normalizedMonthStart),
         ),

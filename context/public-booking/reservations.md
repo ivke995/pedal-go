@@ -1,28 +1,25 @@
-# Public Booking Pending Reservations
+# Public Booking Reservations
 
-The `/booking` customer-details step creates a database-backed pending payment reservation for the featured MVP bike before Stripe Checkout payment.
+`lib/public-booking/reservations.ts` is the server-side reservation boundary used after a public availability check.
 
-## Code paths
+## Current behavior
 
-- `components/booking/booking-flow.tsx` reads `pickup`/`return` query params and submits customer details.
-- `components/booking/customer-details-form.tsx` validates full name, email, phone, terms, and privacy acceptance client-side, then displays server-side errors when returned.
-- `app/actions/create-pending-reservation.ts` is the server action boundary for reservation creation.
-- `lib/public-booking/reservations.ts` validates customer/date input, re-checks featured-bike availability, quotes database-backed USD pricing, and inserts the reservation.
-- `components/booking/payment-preview.tsx` displays the pending reservation reference and starts Stripe Checkout through `app/actions/create-checkout-session.ts`.
+- Customer details and the requested rental window are validated, then availability is re-checked immediately before
+  insert.
+- The featured city-bike reservation stores USD cents calculated from the centralized `$48/day` rate and the existing
+  started-24-hour rental-day rule.
+- New public reservations use status `pending_verification`, assign the first available physical bike when possible, and
+  write hold strategy/expiry metadata into `notes`.
+- The reservation schema provides nullable `paymentMethod` storage for `venmo` or `zelle`; method validation and
+  instruction delivery are implemented by the follow-up manual-payment task.
+- Pending-verification reservations block availability just like confirmed reservations.
 
-## Behavior
+## Related code
 
-- Featured bike type id: `bike-type-mvp-city-bike`.
-- Reservation status starts as `pending`; successful payment confirmation is webhook-only.
-- Creation re-validates pickup/return date ordering and featured-bike availability immediately before inserting.
-- Customer email is normalized to lowercase before storage.
-- The hold strategy assigns the first available physical bike (`bike_id`) when capacity exists.
-- Reservation `notes` stores JSON metadata: `source`, `holdStrategy`, and `holdExpiresAt`.
-- Availability treats `pending` and `confirmed` reservations as blocking capacity.
-- Stripe Checkout starts from the pending reservation payment panel. Success/cancel pages are read-only status views; webhook transition and email sending happen only from verified Stripe events.
+- `app/actions/create-pending-reservation.ts` — server action boundary.
+- `lib/public-booking/availability.ts` — featured-bike availability quote.
+- `lib/domain/availability.ts` — shared capacity conflict logic.
+- `lib/domain/pricing.ts` — rental days and centralized USD rate.
+- `tests/public-booking/reservations.test.ts` — validation, availability re-check, pricing, and insert coverage.
 
-## Tests
-
-- `tests/public-booking/reservations.test.ts` covers customer validation, unavailable re-check behavior, pending insert fields, assigned-bike hold, USD totals, and hold-expiry metadata.
-
-See also: [availability](availability.md), [payments](payments.md), [architecture](../architecture.md), [database foundation](../database/foundation.md).
+See also: [manual payment boundary](payments.md), [availability](availability.md), and [database foundation](../database/foundation.md).

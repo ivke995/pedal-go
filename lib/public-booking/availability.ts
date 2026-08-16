@@ -1,5 +1,5 @@
 import { getBikeAvailability } from '@/lib/domain/availability'
-import { quoteRentalPrice } from '@/lib/domain/pricing'
+import { CURRENT_DAILY_RATE_USD_CENTS, quoteRentalPrice } from '@/lib/domain/pricing'
 import type { BookingDraft } from '@/lib/types'
 
 export const FEATURED_BIKE_TYPE_ID = 'bike-type-mvp-city-bike'
@@ -129,7 +129,7 @@ export async function getFeaturedBikeAvailabilityQuote(
   const quote = quoteRentalPrice(
     validation.pickupAt,
     validation.returnAt,
-    availability.bikeType.dailyRateUsdCents,
+    CURRENT_DAILY_RATE_USD_CENTS,
   )
   const dailyRate = quote.dailyRateUsdCents / 100
   const total = quote.totalUsdCents / 100

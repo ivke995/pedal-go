@@ -13,9 +13,9 @@ Use this file first to find relevant durable context before changing code.
 - `context/admin/dashboard.md` — Protected admin dashboard navigation, operations summary, reservation list/search, manual reservation creation, reservation cancellation, pricing management, availability-block management, and calendar boundaries.
 - `context/public-booking/availability.md` — Homepage availability quote flow, server action boundary, and no-side-effect booking entry behavior.
 - `context/public-booking/reservations.md` — Customer details submission, pending reservation creation, and assigned-bike hold strategy.
-- `context/public-booking/payments.md` — Stripe Checkout creation, pending payment records, metadata contract, webhook-only reservation confirmation, Resend confirmation email trigger, and failed/expired payment handling.
+- `context/public-booking/payments.md` — Current reservation-level manual-payment boundary, $48/day rate, no-payment-table contract, fail-closed legacy provider modules, and follow-up task boundaries.
 - `context/decisions/pedalgo-mvp-architecture-product.md` — Accepted MVP product, architecture, provider, status, and non-goal decisions.
-- `README.md` — Human-facing setup and deployment environment contract for Turso/libSQL, Stripe, Resend, admin bootstrap/session secrets, public URL origins, local development, and deployment checklist.
+- `README.md` — Human-facing setup and deployment environment contract for Turso/libSQL, legacy provider variables, Resend, admin bootstrap/session secrets, public URL origins, local development, and deployment checklist.
 
 ## Working artifacts
 
@@ -29,7 +29,7 @@ Use this file first to find relevant durable context before changing code.
 - `app/page.tsx` — Public homepage composition.
 - `app/actions/` — Server actions used by public/client UI.
 - `app/booking/page.tsx` — Booking route entry.
-- `app/booking/success/page.tsx` and `app/booking/cancel/page.tsx` — Read-only post-Stripe customer status pages.
+- `app/booking/success/page.tsx` and `app/booking/cancel/page.tsx` — Legacy read-only provider-return pages retained temporarily while T03/T05 replace the route flow.
 - `app/admin/(auth)/login/` — Admin sign-in route and login server action.
 - `app/admin/(dashboard)/` — Authenticated admin route group protected by the admin layout; includes summary, reservation list/search/manual creation/cancellation, pricing, availability-block management, calendar, and reports route boundaries.
 - `components/public/` — Public-facing page and search/availability components.
@@ -42,15 +42,15 @@ Use this file first to find relevant durable context before changing code.
 - `lib/admin-auth/` — Server-only admin password verification, signed session cookie handling, and active-admin lookup.
 - `lib/admin-dashboard/` — Server-side admin dashboard summary, reservation list/search, manual reservation creation, reservation cancellation, pricing management, availability-block management, and calendar helpers.
 - `lib/domain/` — Server-side USD pricing and availability services for database-backed rental flows.
-- `lib/public-booking/` — Public booking orchestration, UI-safe availability quote results, Stripe Checkout, webhook finalization, confirmation email, and read-only post-checkout status lookup.
+- `lib/public-booking/` — Public booking orchestration, UI-safe availability quote results, reservation creation, manual-payment boundary, and transitional fail-closed provider modules.
 - `scripts/seed.ts` — MVP city-bike inventory and bootstrap admin seed workflow.
 - `tests/domain/` — Unit tests for server-side pricing, date-range, and availability domain services.
 - `tests/admin-dashboard/` — Unit tests for admin dashboard server-side orchestration, including manual reservations, cancellation, pricing, availability blocks, and calendar helpers.
-- `tests/public-booking/` — Unit tests for public booking availability, reservation, and checkout orchestration.
+- `tests/public-booking/` — Unit tests for public booking availability, reservation, and transitional provider boundaries.
 - `tests/public-booking/reservations.test.ts` — Unit tests for pending reservation validation, availability re-check, and insert behavior.
-- `tests/public-booking/checkout.test.ts` — Unit tests for pending Stripe payment and Checkout Session creation behavior.
-- `tests/public-booking/webhooks.test.ts` — Unit tests for Stripe webhook payment/reservation finalization and invalid signature rejection.
-- `tests/public-booking/status.test.ts` — Unit tests for read-only public booking status classification and lookup.
+- `tests/public-booking/checkout.test.ts` — Regression test that the legacy card-checkout boundary fails closed without provider persistence.
+- `tests/public-booking/webhooks.test.ts` — Regression test that legacy provider events are ignored.
+- `tests/public-booking/status.test.ts` — Regression test that legacy provider-session lookup is unavailable.
 - `drizzle.config.ts` — Drizzle Kit migration configuration.
 - `drizzle/` — Generated Drizzle migration metadata/output.
 - `README.md` — Canonical deployment/local setup document for required and optional environment variables.

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for the MVP release state; current implemented booking/payment behavior is summarized in `context/public-booking/` and admin behavior in `context/admin/`.
+Accepted for the original MVP release state; the White Mountains redesign supersedes the provider-payment decisions below as implementation proceeds. Current behavior is summarized in `context/public-booking/` and `context/admin/`.
 
 ## Decision
 
@@ -12,12 +12,12 @@ PedalGo MVP is a web application for online bicycle rentals with a customer-firs
 
 - Customers do not create accounts or log in.
 - Customers provide only full name, email address, and phone number during booking.
-- A reservation is valid only after successful online payment.
-- Stripe Checkout is the MVP payment provider.
-- Verified Stripe webhook confirmation, not the success page, finalizes reservations.
+- A public reservation starts in `pending_verification`; external payment instructions do not prove payment.
+- Venmo/Zelle are manual instruction methods; no provider API, payment table, or webhook finalizes reservations.
+- Only a protected owner/admin verification action may later transition a pending-verification reservation to `confirmed`.
 - Resend is the MVP email provider for booking confirmations.
 - Administrators authenticate at `/admin/login` before accessing the dashboard.
-- Administrators manage reservations, pricing, bicycle availability, maintenance blocks, and payment status visibility.
+- Administrators manage reservations, pricing, bicycle availability, maintenance blocks, and manual payment-method visibility.
 
 ## MVP rental model
 
@@ -30,23 +30,21 @@ PedalGo MVP is a web application for online bicycle rentals with a customer-firs
 ## Data platform
 
 - Use Turso/libSQL with Drizzle ORM for the first implementation phase.
-- Model future expansion from the start: `BikeType`, `Bike`, `Reservation`, `Payment`, `AvailabilityBlock`, and `AdminUser`.
+- Model future expansion from the start: `BikeType`, `Bike`, `Reservation`, `AvailabilityBlock`, and `AdminUser`; provider payment persistence is out of scope.
 
 ## Core statuses
 
 Reservation statuses in code/database:
-- `pending`
+- `pending_verification`
 - `confirmed`
 - `cancelled`
 - `completed`
 - `failed`
 - `refunded`
 
-Payment statuses in code/database:
-- `pending`
-- `confirmed`
-- `failed`
-- `refunded`
+Reservation payment methods in code/database:
+- `venmo`
+- `zelle`
 
 Bicycle statuses in code/database:
 - `available`

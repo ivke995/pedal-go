@@ -10,7 +10,7 @@ const MVP_BIKE_TYPE = {
   name: "PedalGo City Bike",
   slug: "city-bike",
   description: "Comfortable all-purpose city bike for PedalGo MVP rentals.",
-  dailyRateUsdCents: 2500,
+  dailyRateUsdCents: 4800,
   imagePath: "/bikes/city-bike.jpg",
   featuresJson: ["Step-through frame", "Front basket", "Integrated lights", "Helmet included"] as string[],
   isActive: true,

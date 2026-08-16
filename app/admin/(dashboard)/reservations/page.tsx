@@ -11,11 +11,11 @@ import {
 } from "@/lib/admin-dashboard/manual-reservations";
 import {
   getAdminReservations,
-  parsePaymentStatus,
+  parsePaymentMethod,
   parseReservationStatus,
   type AdminReservationListItem,
 } from "@/lib/admin-dashboard/reservations";
-import { PAYMENT_STATUSES, RESERVATION_STATUSES } from "@/lib/db/schema";
+import { PAYMENT_METHODS, RESERVATION_STATUSES } from "@/lib/db/schema";
 import { formatCurrency, formatDateTime, formatDuration } from "@/lib/pricing";
 
 export const metadata = {
@@ -26,7 +26,7 @@ type AdminReservationsPageProps = {
   searchParams: Promise<{
     search?: string | string[];
     status?: string | string[];
-    paymentStatus?: string | string[];
+  paymentMethod?: string | string[];
     created?: string | string[];
     createError?: string | string[];
     cancelled?: string | string[];
@@ -43,26 +43,29 @@ function statusLabel(value: string): string {
 }
 
 function ReservationStatusBadge({ status }: { status: AdminReservationListItem["reservationStatus"] }) {
-  const variant = status === "cancelled" || status === "failed" ? "destructive" : status === "pending" ? "secondary" : "default";
+  const variant =
+    status === "cancelled" || status === "failed"
+      ? "destructive"
+      : status === "pending_verification"
+        ? "secondary"
+        : "default";
 
   return <Badge variant={variant}>{statusLabel(status)}</Badge>;
 }
 
-function PaymentStatusBadge({ status }: { status: AdminReservationListItem["paymentStatus"] }) {
-  if (status === "none") return <Badge variant="outline">No payment</Badge>;
+function PaymentMethodBadge({ method }: { method: AdminReservationListItem["paymentMethod"] }) {
+  if (method === "none") return <Badge variant="outline">Not selected</Badge>;
 
-  const variant = status === "failed" ? "destructive" : status === "pending" ? "secondary" : "default";
-
-  return <Badge variant={variant}>{statusLabel(status)}</Badge>;
+  return <Badge variant="secondary">{statusLabel(method)}</Badge>;
 }
 
 export default async function AdminReservationsPage({ searchParams }: AdminReservationsPageProps) {
   const params = await searchParams;
   const search = firstParam(params.search).trim();
   const reservationStatus = parseReservationStatus(firstParam(params.status));
-  const paymentStatus = parsePaymentStatus(firstParam(params.paymentStatus));
+  const paymentMethod = parsePaymentMethod(firstParam(params.paymentMethod));
   const [result, bikeTypeOptions] = await Promise.all([
-    getAdminReservations({ search, reservationStatus, paymentStatus }),
+    getAdminReservations({ search, reservationStatus, paymentMethod }),
     getAdminReservationFormBikeTypes(),
   ]);
   const createdReference = firstParam(params.created).trim();
@@ -76,7 +79,7 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
         <CardHeader>
           <CardTitle>Reservations</CardTitle>
           <CardDescription>
-            Search bookings by reference or customer details, filter by reservation/payment status, and review rental
+             Search bookings by reference or customer details, filter by reservation/payment method, and review rental
             state in one protected admin view.
           </CardDescription>
         </CardHeader>
@@ -113,20 +116,20 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium" htmlFor="payment-status">
-                Payment status
+              <label className="text-sm font-medium" htmlFor="payment-method">
+                Payment method
               </label>
               <select
-                id="payment-status"
-                name="paymentStatus"
-                defaultValue={paymentStatus}
+                id="payment-method"
+                name="paymentMethod"
+                defaultValue={paymentMethod}
                 className="mt-1 h-8 rounded-lg border border-input bg-background px-2.5 text-sm"
               >
-                <option value="all">All payments</option>
-                <option value="none">No payment</option>
-                {PAYMENT_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {statusLabel(status)}
+                <option value="all">All methods</option>
+                <option value="none">Not selected</option>
+                {PAYMENT_METHODS.map((method) => (
+                  <option key={method} value={method}>
+                    {statusLabel(method)}
                   </option>
                 ))}
               </select>
@@ -162,7 +165,7 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
           ) : null}
           {cancelledReference ? (
             <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-              Cancelled reservation {cancelledReference}. Payment status remains visible in the records below.
+               Cancelled reservation {cancelledReference}. Manual payment details remain visible in the records below.
             </div>
           ) : null}
           {cancelError ? (
@@ -301,10 +304,7 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
                       <ReservationStatusBadge status={reservation.reservationStatus} />
                     </TableCell>
                     <TableCell>
-                      <PaymentStatusBadge status={reservation.paymentStatus} />
-                      {reservation.paymentProvider ? (
-                        <div className="mt-1 text-xs text-muted-foreground">{reservation.paymentProvider}</div>
-                      ) : null}
+                       <PaymentMethodBadge method={reservation.paymentMethod} />
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(reservation.totalUsdCents / 100)}

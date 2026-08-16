@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { reservations, type ReservationStatus } from "@/lib/db/schema";
 
-const CANCELLABLE_RESERVATION_STATUSES = ["pending", "confirmed"] as const satisfies readonly ReservationStatus[];
+const CANCELLABLE_RESERVATION_STATUSES = ["pending_verification", "confirmed"] as const satisfies readonly ReservationStatus[];
 
 export type CancelReservationInput = {
   reservationId: string;

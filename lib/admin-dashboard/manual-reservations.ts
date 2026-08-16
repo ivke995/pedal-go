@@ -5,10 +5,10 @@ import { asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { bikeTypes, reservations, type ReservationStatus } from "@/lib/db/schema";
 import { getBikeAvailability } from "@/lib/domain/availability";
-import { quoteRentalPrice } from "@/lib/domain/pricing";
+import { CURRENT_DAILY_RATE_USD_CENTS, quoteRentalPrice } from "@/lib/domain/pricing";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ADMIN_CREATE_RESERVATION_STATUSES = ["confirmed", "pending"] as const satisfies readonly ReservationStatus[];
+const ADMIN_CREATE_RESERVATION_STATUSES = ["confirmed", "pending_verification"] as const satisfies readonly ReservationStatus[];
 
 export type AdminCreateReservationStatus = (typeof ADMIN_CREATE_RESERVATION_STATUSES)[number];
 
@@ -164,7 +164,7 @@ export async function createManualReservation(
     };
   }
 
-  const quote = quoteRentalPrice(validation.pickupAt, validation.returnAt, availability.bikeType.dailyRateUsdCents);
+  const quote = quoteRentalPrice(validation.pickupAt, validation.returnAt, CURRENT_DAILY_RATE_USD_CENTS);
   const now = options.now ?? new Date();
   const selectedBike = availability.availableBikes[0] ?? null;
   const adminNote = input.notes?.trim();

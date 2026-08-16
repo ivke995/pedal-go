@@ -19,7 +19,7 @@ const bikeType = {
   name: 'PedalGo City Bike',
   slug: 'city-bike',
   description: 'Comfortable all-purpose city bike.',
-  dailyRateUsdCents: 2500,
+  dailyRateUsdCents: 4800,
   imagePath: null,
   featuresJson: [],
   isActive: true,
@@ -111,9 +111,10 @@ describe('public booking availability quote', () => {
     assert.equal(result.bikeName, 'PedalGo City Bike')
     assert.equal(result.availableUnits, 1)
     assert.equal(result.draft.days, 3)
-    assert.equal(result.draft.dailyRate, 25)
-    assert.equal(result.draft.total, 75)
-    assert.equal(result.totalUsdCents, 7500)
+    assert.equal(result.draft.dailyRate, 48)
+    assert.equal(result.draft.total, 144)
+    assert.equal(result.dailyRateUsdCents, 4800)
+    assert.equal(result.totalUsdCents, 14400)
   })
 
   it('returns unavailable when the featured bike has no capacity', async () => {

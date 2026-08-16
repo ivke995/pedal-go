@@ -1,5 +1,7 @@
 const MS_PER_RENTAL_DAY = 24 * 60 * 60 * 1000;
 
+export const CURRENT_DAILY_RATE_USD_CENTS = 4800;
+
 export type RentalDateInput = Date | string | number;
 
 export type RentalPriceQuote = {
@@ -39,7 +41,7 @@ export function calculateTotalUsdCents(rentalDays: number, dailyRateUsdCents: nu
 export function quoteRentalPrice(
   pickupAt: RentalDateInput,
   returnAt: RentalDateInput,
-  dailyRateUsdCents: number,
+  dailyRateUsdCents: number = CURRENT_DAILY_RATE_USD_CENTS,
 ): RentalPriceQuote {
   const rentalDays = calculateRentalDays(pickupAt, returnAt);
 

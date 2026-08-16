@@ -3,7 +3,7 @@ import "server-only";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/lib/db/client";
-import { availabilityBlocks, bikeTypes, bikes, payments, reservations } from "@/lib/db/schema";
+import { availabilityBlocks, bikeTypes, bikes, reservations } from "@/lib/db/schema";
 
 type CountRow = {
   count: number | string | bigint | null;
@@ -21,7 +21,7 @@ function toNumber(value: number | string | bigint | null | undefined): number {
   return 0;
 }
 
-async function countFrom(table: typeof reservations | typeof payments | typeof availabilityBlocks | typeof bikeTypes | typeof bikes) {
+async function countFrom(table: typeof reservations | typeof availabilityBlocks | typeof bikeTypes | typeof bikes) {
   const [row] = await db.select({ count: sql<number>`count(*)` }).from(table);
 
   return toNumber((row as CountRow | undefined)?.count);
@@ -29,13 +29,12 @@ async function countFrom(table: typeof reservations | typeof payments | typeof a
 
 export type AdminDashboardSummary = {
   totalReservations: number;
-  pendingReservations: number;
+  pendingVerificationReservations: number;
   confirmedReservations: number;
-  pendingPayments: number;
   activeAvailabilityBlocks: number;
   activeBikeTypes: number;
   physicalBikes: number;
-  confirmedRevenueUsdCents: number;
+  confirmedReservationValueUsdCents: number;
 };
 
 export async function getAdminDashboardSummary(): Promise<AdminDashboardSummary> {
@@ -43,18 +42,19 @@ export async function getAdminDashboardSummary(): Promise<AdminDashboardSummary>
 
   const [
     totalReservations,
-    pendingReservationsResult,
+    pendingVerificationReservationsResult,
     confirmedReservationsResult,
-    pendingPaymentsResult,
     activeAvailabilityBlocksResult,
     activeBikeTypesResult,
     physicalBikes,
-    confirmedRevenueResult,
+    confirmedReservationValueResult,
   ] = await Promise.all([
     countFrom(reservations),
-    db.select({ count: sql<number>`count(*)` }).from(reservations).where(sql`${reservations.status} = 'pending'`),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(reservations)
+      .where(sql`${reservations.status} = 'pending_verification'`),
     db.select({ count: sql<number>`count(*)` }).from(reservations).where(sql`${reservations.status} = 'confirmed'`),
-    db.select({ count: sql<number>`count(*)` }).from(payments).where(sql`${payments.status} = 'pending'`),
     db
       .select({ count: sql<number>`count(*)` })
       .from(availabilityBlocks)
@@ -62,19 +62,22 @@ export async function getAdminDashboardSummary(): Promise<AdminDashboardSummary>
     db.select({ count: sql<number>`count(*)` }).from(bikeTypes).where(sql`${bikeTypes.isActive} = 1`),
     countFrom(bikes),
     db
-      .select({ totalUsdCents: sql<number>`coalesce(sum(${payments.amountUsdCents}), 0)` })
-      .from(payments)
-      .where(sql`${payments.status} = 'confirmed'`),
+      .select({ totalUsdCents: sql<number>`coalesce(sum(${reservations.totalUsdCents}), 0)` })
+      .from(reservations)
+      .where(sql`${reservations.status} = 'confirmed'`),
   ]);
 
   return {
     totalReservations,
-    pendingReservations: toNumber((pendingReservationsResult[0] as CountRow | undefined)?.count),
+    pendingVerificationReservations: toNumber(
+      (pendingVerificationReservationsResult[0] as CountRow | undefined)?.count,
+    ),
     confirmedReservations: toNumber((confirmedReservationsResult[0] as CountRow | undefined)?.count),
-    pendingPayments: toNumber((pendingPaymentsResult[0] as CountRow | undefined)?.count),
     activeAvailabilityBlocks: toNumber((activeAvailabilityBlocksResult[0] as CountRow | undefined)?.count),
     activeBikeTypes: toNumber((activeBikeTypesResult[0] as CountRow | undefined)?.count),
     physicalBikes,
-    confirmedRevenueUsdCents: toNumber((confirmedRevenueResult[0] as RevenueRow | undefined)?.totalUsdCents),
+    confirmedReservationValueUsdCents: toNumber(
+      (confirmedReservationValueResult[0] as RevenueRow | undefined)?.totalUsdCents,
+    ),
   };
 }

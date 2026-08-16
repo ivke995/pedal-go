@@ -12,7 +12,7 @@ export const BIKE_STATUSES = ["available", "reserved", "rented", "maintenance", 
 export type BikeStatus = (typeof BIKE_STATUSES)[number];
 
 export const RESERVATION_STATUSES = [
-  "pending",
+  "pending_verification",
   "confirmed",
   "cancelled",
   "completed",
@@ -21,8 +21,8 @@ export const RESERVATION_STATUSES = [
 ] as const;
 export type ReservationStatus = (typeof RESERVATION_STATUSES)[number];
 
-export const PAYMENT_STATUSES = ["pending", "confirmed", "failed", "refunded"] as const;
-export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+export const PAYMENT_METHODS = ["venmo", "zelle"] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export const AVAILABILITY_BLOCK_STATUSES = ["reserved", "maintenance", "inactive"] as const;
 export type AvailabilityBlockStatus = (typeof AVAILABILITY_BLOCK_STATUSES)[number];
@@ -96,7 +96,8 @@ export const reservations = sqliteTable(
     rentalDays: integer("rental_days").notNull(),
     dailyRateUsdCents: integer("daily_rate_usd_cents").notNull(),
     totalUsdCents: integer("total_usd_cents").notNull(),
-    status: text("status", { enum: RESERVATION_STATUSES }).notNull().default("pending"),
+    status: text("status", { enum: RESERVATION_STATUSES }).notNull().default("pending_verification"),
+    paymentMethod: text("payment_method", { enum: PAYMENT_METHODS }),
     notes: text("notes"),
     createdAt: timestampMs("created_at"),
     updatedAt: timestampMs("updated_at"),
@@ -112,32 +113,6 @@ export const reservations = sqliteTable(
     check("reservations_rental_days_positive", sql`${table.rentalDays} > 0`),
     check("reservations_daily_rate_positive", sql`${table.dailyRateUsdCents} > 0`),
     check("reservations_total_positive", sql`${table.totalUsdCents} > 0`),
-  ],
-);
-
-export const payments = sqliteTable(
-  "payments",
-  {
-    id: text("id").primaryKey(),
-    reservationId: text("reservation_id")
-      .notNull()
-      .references(() => reservations.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    amountUsdCents: integer("amount_usd_cents").notNull(),
-    status: text("status", { enum: PAYMENT_STATUSES }).notNull().default("pending"),
-    provider: text("provider"),
-    providerPaymentId: text("provider_payment_id"),
-    providerCheckoutId: text("provider_checkout_id"),
-    paidAt: integer("paid_at", { mode: "timestamp_ms" }),
-    refundedAt: integer("refunded_at", { mode: "timestamp_ms" }),
-    createdAt: timestampMs("created_at"),
-    updatedAt: timestampMs("updated_at"),
-  },
-  (table) => [
-    index("payments_reservation_idx").on(table.reservationId),
-    index("payments_status_idx").on(table.status),
-    uniqueIndex("payments_provider_payment_unique").on(table.provider, table.providerPaymentId),
-    check("payments_status_check", statusCheck("status", PAYMENT_STATUSES)),
-    check("payments_amount_positive", sql`${table.amountUsdCents} > 0`),
   ],
 );
 
@@ -201,7 +176,7 @@ export const bikesRelations = relations(bikes, ({ one, many }) => ({
   availabilityBlocks: many(availabilityBlocks),
 }));
 
-export const reservationsRelations = relations(reservations, ({ one, many }) => ({
+export const reservationsRelations = relations(reservations, ({ one }) => ({
   bikeType: one(bikeTypes, {
     fields: [reservations.bikeTypeId],
     references: [bikeTypes.id],
@@ -209,14 +184,6 @@ export const reservationsRelations = relations(reservations, ({ one, many }) => 
   bike: one(bikes, {
     fields: [reservations.bikeId],
     references: [bikes.id],
-  }),
-  payments: many(payments),
-}));
-
-export const paymentsRelations = relations(payments, ({ one }) => ({
-  reservation: one(reservations, {
-    fields: [payments.reservationId],
-    references: [reservations.id],
   }),
 }));
 

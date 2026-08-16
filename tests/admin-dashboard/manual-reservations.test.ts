@@ -20,7 +20,7 @@ const bikeType = {
   name: "PedalGo City Bike",
   slug: "city-bike",
   description: "Comfortable all-purpose city bike.",
-  dailyRateUsdCents: 2500,
+  dailyRateUsdCents: 4800,
   imagePath: null,
   featuresJson: [],
   isActive: true,
@@ -155,8 +155,8 @@ describe("admin manual reservation creation", () => {
     assert.equal(inserted.bikeId, "bike-1");
     assert.equal(inserted.customerEmail, "jane.admin@example.com");
     assert.equal(inserted.rentalDays, 3);
-    assert.equal(inserted.dailyRateUsdCents, 2500);
-    assert.equal(inserted.totalUsdCents, 7500);
+    assert.equal(inserted.dailyRateUsdCents, 4800);
+    assert.equal(inserted.totalUsdCents, 14400);
     assert.deepEqual(JSON.parse(String(inserted.notes)), {
       source: "admin_manual",
       holdStrategy: "assigned_bike",
