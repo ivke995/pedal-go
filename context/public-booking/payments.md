@@ -9,9 +9,9 @@ submission UI, server-side instruction/notification boundary, and protected owne
   `lib/domain/pricing.ts`.
 - Reservations persist an optional `paymentMethod` of `venmo` or `zelle` and use `pending_verification` for unpaid manual
   review.
-- Valid public submissions require `VENMO_HANDLE`, `ZELLE_RECIPIENT`, `OWNER_NOTIFICATION_EMAIL`, and `EMAIL_FROM` on the
-  server. The selected method's recipient and exact-amount instructions are returned; owner recipient and sender values
-  are not returned.
+- Valid public submissions require `VENMO_HANDLE`, `ZELLE_RECIPIENT`, `OWNER_NOTIFICATION_EMAIL`, `EMAIL_FROM`, and
+  `RESEND_API_KEY` on the server. The selected method's recipient and exact-amount instructions are returned; owner
+  recipient and sender values are not returned.
 - `confirmation-email.ts` builds escaped customer and owner reservation-received messages through the existing Resend
   sender. Messages include reservation reference, bike, dates, duration, amount due, selected method, instructions, and
   explicit `Payment pending manual confirmation` wording.
