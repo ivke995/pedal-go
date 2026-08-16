@@ -12,8 +12,8 @@ Use this file first to find relevant durable context before changing code.
 - `context/admin/authentication.md` — Admin login, active-admin credential verification, signed session cookie, logout, and protected admin route boundaries.
 - `context/admin/dashboard.md` — Protected admin dashboard navigation, operations summary, reservation list/search, manual reservation creation, reservation cancellation, pricing management, availability-block management, and calendar boundaries.
 - `context/public-booking/availability.md` — Homepage availability quote flow, server action boundary, and no-side-effect booking entry behavior.
-- `context/public-booking/reservations.md` — Customer details submission, pending reservation creation, and assigned-bike hold strategy.
-- `context/public-booking/payments.md` — Current reservation-level manual-payment boundary, $48/day rate, no-payment-table contract, fail-closed legacy provider modules, and follow-up task boundaries.
+- `context/public-booking/reservations.md` — Customer details/payment-method submission, pending reservation creation, selected-method instructions, notifications, and assigned-bike hold strategy.
+- `context/public-booking/payments.md` — Current reservation-level manual-payment boundary, $48/day rate, server-only Venmo/Zelle instructions, Resend notifications, no-payment-table contract, legacy provider modules, and follow-up task boundaries.
 - `context/decisions/pedalgo-mvp-architecture-product.md` — Accepted MVP product, architecture, provider, status, and non-goal decisions.
 - `README.md` — Human-facing setup and deployment environment contract for Turso/libSQL, legacy provider variables, Resend, admin bootstrap/session secrets, public URL origins, local development, and deployment checklist.
 
@@ -29,11 +29,11 @@ Use this file first to find relevant durable context before changing code.
 - `app/page.tsx` — Public homepage composition.
 - `app/actions/` — Server actions used by public/client UI.
 - `app/booking/page.tsx` — Booking route entry.
-- `app/booking/success/page.tsx` and `app/booking/cancel/page.tsx` — Legacy read-only provider-return pages retained temporarily while T03/T05 replace the route flow.
+- `app/booking/success/page.tsx` and `app/booking/cancel/page.tsx` — Legacy read-only provider-return pages retained temporarily until T05 cleanup; the active booking flow does not navigate to them.
 - `app/admin/(auth)/login/` — Admin sign-in route and login server action.
 - `app/admin/(dashboard)/` — Authenticated admin route group protected by the admin layout; includes summary, reservation list/search/manual creation/cancellation, pricing, availability-block management, calendar, and reports route boundaries.
 - `components/public/` — Public-facing page and search/availability components.
-- `components/booking/` — Booking flow components.
+- `components/booking/` — Details, Venmo/Zelle method selection, submission, and reservation-confirmation components.
 - `components/ui/` — Shared UI primitives.
 - `lib/types.ts` — Shared domain types.
 - `lib/pricing.ts` — Current UI USD pricing and formatting helpers.
@@ -42,7 +42,7 @@ Use this file first to find relevant durable context before changing code.
 - `lib/admin-auth/` — Server-only admin password verification, signed session cookie handling, and active-admin lookup.
 - `lib/admin-dashboard/` — Server-side admin dashboard summary, reservation list/search, manual reservation creation, reservation cancellation, pricing management, availability-block management, and calendar helpers.
 - `lib/domain/` — Server-side USD pricing and availability services for database-backed rental flows.
-- `lib/public-booking/` — Public booking orchestration, UI-safe availability quote results, reservation creation, manual-payment boundary, and transitional fail-closed provider modules.
+- `lib/public-booking/` — Public booking orchestration, UI-safe availability quote results, reservation creation, server-side manual-payment instructions/notifications, and transitional fail-closed provider modules.
 - `scripts/seed.ts` — MVP city-bike inventory and bootstrap admin seed workflow.
 - `tests/domain/` — Unit tests for server-side pricing, date-range, and availability domain services.
 - `tests/admin-dashboard/` — Unit tests for admin dashboard server-side orchestration, including manual reservations, cancellation, pricing, availability blocks, and calendar helpers.

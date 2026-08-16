@@ -35,6 +35,21 @@ const validInput = {
   fullName: 'Jane Doe',
   email: 'Jane@example.com',
   phone: '+1 555 123 4567',
+  paymentMethod: 'venmo',
+}
+
+const paymentConfig = {
+  venmoHandle: '@white-mountains',
+  zelleRecipient: 'payments@example.test',
+  ownerNotificationEmail: 'owner@example.test',
+  emailFrom: 'White Mountains <bookings@example.test>',
+}
+
+function testOptions() {
+  return {
+    paymentConfig,
+    emailSender: async () => undefined,
+  }
 }
 
 function bike(id: string): Row {
@@ -112,6 +127,7 @@ describe('public booking pending reservation', () => {
     const result = await createPendingReservation(
       { ...validInput, fullName: '', email: 'bad', phone: '12' },
       database as never,
+      testOptions(),
     )
 
     assert.equal(result.status, 'error')
@@ -124,11 +140,34 @@ describe('public booking pending reservation', () => {
   it('re-validates availability and does not insert when unavailable', async () => {
     const database = fakeDatabase({ bikeType, bikeRows: [] })
 
-    const result = await createPendingReservation(validInput, database as never)
+    const result = await createPendingReservation(validInput, database as never, testOptions())
 
     assert.equal(result.status, 'unavailable')
     assert.match(result.message, /No PedalGo City Bikes are available/)
     assert.equal(database.insertedRows.length, 0)
+  })
+
+  it('fails safely without payment configuration and does not insert', async () => {
+    const database = fakeDatabase({ bikeType, bikeRows: [bike('bike-1')] })
+    const names = ['VENMO_HANDLE', 'ZELLE_RECIPIENT', 'OWNER_NOTIFICATION_EMAIL', 'EMAIL_FROM']
+    const previous = Object.fromEntries(names.map((name) => [name, process.env[name]]))
+
+    try {
+      for (const name of names) delete process.env[name]
+
+      const result = await createPendingReservation(validInput, database as never, {
+        emailSender: async () => undefined,
+      })
+
+      assert.equal(result.status, 'error')
+      assert.match(result.message, /not configured/i)
+      assert.equal(database.insertedRows.length, 0)
+    } finally {
+      for (const name of names) {
+        if (previous[name] === undefined) delete process.env[name]
+        else process.env[name] = previous[name]
+      }
+    }
   })
 
   it('creates a pending reservation with customer, price, bike hold, and expiry metadata', async () => {
@@ -139,6 +178,7 @@ describe('public booking pending reservation', () => {
       now,
       idFactory: () => 'reservation-1',
       referenceFactory: () => 'PG-TEST-0001',
+      ...testOptions(),
     })
 
     assert.equal(result.status, 'created')
@@ -149,16 +189,35 @@ describe('public booking pending reservation', () => {
     assert.equal(result.reservation.rentalDays, 3)
     assert.equal(result.reservation.dailyRateUsdCents, 4800)
     assert.equal(result.reservation.totalUsdCents, 14400)
+    assert.equal(result.reservation.paymentMethod, 'venmo')
+    assert.equal(result.reservation.paymentInstructions.recipient, '@white-mountains')
+    assert.match(result.reservation.paymentInstructions.instructions, /\$144\.00/)
     assert.equal(result.reservation.holdExpiresAt, '2026-07-14T09:30:00.000Z')
     assert.equal(database.insertedRows.length, 1)
 
     const inserted = database.insertedRows[0]
     assert.equal(inserted.status, 'pending_verification')
+    assert.equal(inserted.paymentMethod, 'venmo')
     assert.equal(inserted.bikeId, 'bike-1')
     assert.deepEqual(JSON.parse(String(inserted.notes)), {
       source: 'public_booking',
       holdStrategy: 'assigned_bike',
       holdExpiresAt: '2026-07-14T09:30:00.000Z',
     })
+  })
+
+  it('keeps the reservation pending when notification delivery fails', async () => {
+    const database = fakeDatabase({ bikeType, bikeRows: [bike('bike-1')] })
+    const result = await createPendingReservation(validInput, database as never, {
+      ...testOptions(),
+      emailSender: async () => {
+        throw new Error('mail provider unavailable')
+      },
+    })
+
+    assert.equal(result.status, 'notification_error')
+    assert.match(result.message, /remains pending manual confirmation/i)
+    assert.equal(result.reservation.status, 'pending_verification')
+    assert.equal(database.insertedRows[0].status, 'pending_verification')
   })
 })

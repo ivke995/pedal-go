@@ -10,9 +10,15 @@
   started-24-hour rental-day rule.
 - New public reservations use status `pending_verification`, assign the first available physical bike when possible, and
   write hold strategy/expiry metadata into `notes`.
-- The reservation schema provides nullable `paymentMethod` storage for `venmo` or `zelle`; method validation and
-  instruction delivery are implemented by the follow-up manual-payment task.
+- Public submission validates `venmo` or `zelle`, persists the selected method, and returns only that method's recipient
+  and exact-amount instructions in the UI-safe summary.
+- Submission sends customer and owner reservation-received notifications through the server-side Resend boundary. The
+  owner recipient and sender configuration are never included in the public result.
+- Missing payment configuration fails before insert. A post-insert email failure reports `notification_error` while the
+  saved reservation remains `pending_verification`.
 - Pending-verification reservations block availability just like confirmed reservations.
+- The active `/booking` UI calls the reservation action only after customer details and a Venmo/Zelle method are selected;
+  successful results render the reference, exact amount, selected instructions, and manual-confirmation next steps.
 
 ## Related code
 
@@ -21,5 +27,6 @@
 - `lib/domain/availability.ts` — shared capacity conflict logic.
 - `lib/domain/pricing.ts` — rental days and centralized USD rate.
 - `tests/public-booking/reservations.test.ts` — validation, availability re-check, pricing, and insert coverage.
+- `tests/public-booking/notifications.test.ts` — notification content, recipient separation, and HTML escaping coverage.
 
 See also: [manual payment boundary](payments.md), [availability](availability.md), and [database foundation](../database/foundation.md).

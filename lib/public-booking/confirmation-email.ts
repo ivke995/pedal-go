@@ -1,11 +1,13 @@
 import { Resend } from 'resend'
 
-import type { reservations } from '@/lib/db/schema'
 import { formatUsdCents } from '@/lib/domain/pricing'
+import type {
+  ManualPaymentConfiguration,
+  ManualPaymentInstructions,
+  PendingReservationSummary,
+} from './reservations'
 
-type ReservationRow = typeof reservations.$inferSelect
-
-export type ConfirmationEmailMessage = {
+export type ReservationEmailMessage = {
   from: string
   to: string
   subject: string
@@ -13,27 +15,7 @@ export type ConfirmationEmailMessage = {
   html: string
 }
 
-export type ConfirmationEmailSender = (message: ConfirmationEmailMessage) => Promise<void>
-
-type BookingContactDetails = {
-  pickupLocation: string
-  contactEmail: string
-  contactPhone: string
-  supportHours: string
-  pickupInstructions: string
-}
-
-const DEFAULT_CONTACT_DETAILS: BookingContactDetails = {
-  pickupLocation: 'PedalGo, Obala Kulina bana 12, Sarajevo',
-  contactEmail: 'hello@pedalgo.example',
-  contactPhone: '+387 33 000 000',
-  supportHours: 'Mon–Sun · 08:00 – 20:00',
-  pickupInstructions: 'Bring your reservation number and a valid photo ID. Look for the green PedalGo sign at the central riverside shop.',
-}
-
-function getEnvOrDefault(name: string, fallback: string): string {
-  return process.env[name]?.trim() || fallback
-}
+export type ReservationEmailSender = (message: ReservationEmailMessage) => Promise<void>
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name]?.trim()
@@ -43,16 +25,6 @@ function getRequiredEnv(name: string): string {
   }
 
   return value
-}
-
-function getContactDetails(): BookingContactDetails {
-  return {
-    pickupLocation: getEnvOrDefault('PEDALGO_PICKUP_LOCATION', DEFAULT_CONTACT_DETAILS.pickupLocation),
-    contactEmail: getEnvOrDefault('PEDALGO_CONTACT_EMAIL', DEFAULT_CONTACT_DETAILS.contactEmail),
-    contactPhone: getEnvOrDefault('PEDALGO_CONTACT_PHONE', DEFAULT_CONTACT_DETAILS.contactPhone),
-    supportHours: getEnvOrDefault('PEDALGO_SUPPORT_HOURS', DEFAULT_CONTACT_DETAILS.supportHours),
-    pickupInstructions: getEnvOrDefault('PEDALGO_PICKUP_INSTRUCTIONS', DEFAULT_CONTACT_DETAILS.pickupInstructions),
-  }
 }
 
 function formatBookingDateTime(date: Date): string {
@@ -76,58 +48,93 @@ function escapeHtml(value: string): string {
     .replaceAll("'", '&#39;')
 }
 
-export function buildConfirmationEmailMessage(reservation: ReservationRow): ConfirmationEmailMessage {
-  const contact = getContactDetails()
-  const totalPaid = formatUsdCents(reservation.totalUsdCents)
-  const pickupAt = formatBookingDateTime(reservation.pickupAt)
-  const returnAt = formatBookingDateTime(reservation.returnAt)
-  const subject = `PedalGo reservation confirmed: ${reservation.reference}`
-  const from = getEnvOrDefault('RESEND_FROM_EMAIL', 'PedalGo <bookings@pedalgo.example>')
+function methodLabel(instructions: ManualPaymentInstructions): string {
+  return instructions.method === 'venmo' ? 'Venmo' : 'Zelle'
+}
 
-  const text = [
-    `Hi ${reservation.customerName},`,
-    '',
-    'Your PedalGo bike rental is confirmed.',
-    '',
-    `Reservation number: ${reservation.reference}`,
-    `Pickup: ${pickupAt}`,
-    `Return: ${returnAt}`,
-    `Total paid: ${totalPaid}`,
-    '',
-    `Pickup location: ${contact.pickupLocation}`,
-    `Contact: ${contact.contactEmail} · ${contact.contactPhone}`,
-    `Support hours: ${contact.supportHours}`,
-    '',
-    `Pickup instructions: ${contact.pickupInstructions}`,
-    '',
-    'Thank you for booking with PedalGo.',
-  ].join('\n')
-
-  const rows = [
+function buildRows(
+  reservation: PendingReservationSummary,
+  instructions: ManualPaymentInstructions,
+): Array<[string, string]> {
+  return [
     ['Reservation number', reservation.reference],
-    ['Pickup', pickupAt],
-    ['Return', returnAt],
-    ['Total paid', totalPaid],
-    ['Pickup location', contact.pickupLocation],
-    ['Contact information', `${contact.contactEmail} · ${contact.contactPhone}`],
-    ['Support hours', contact.supportHours],
-    ['Pickup instructions', contact.pickupInstructions],
+    ['Bike', reservation.bikeName],
+    ['Pickup', formatBookingDateTime(new Date(reservation.pickupAt))],
+    ['Return', formatBookingDateTime(new Date(reservation.returnAt))],
+    ['Rental duration', `${reservation.rentalDays} day${reservation.rentalDays === 1 ? '' : 's'}`],
+    ['Amount due', formatUsdCents(reservation.totalUsdCents)],
+    ['Payment method', methodLabel(instructions)],
+    ['Payment recipient', instructions.recipient],
+    ['Payment instructions', instructions.instructions],
   ]
+}
 
-  const htmlRows = rows
+function buildText(
+  greeting: string,
+  reservation: PendingReservationSummary,
+  instructions: ManualPaymentInstructions,
+  includeCustomerDetails = false,
+): string {
+  const rows = buildRows(reservation, instructions)
+
+  return [
+    greeting,
+    '',
+    'Your White Mountains Bike Rentals reservation has been received.',
+    'Payment pending manual confirmation: send the amount below using the selected payment method. Your reservation is not confirmed until the owner independently verifies the payment.',
+    '',
+    ...(includeCustomerDetails
+      ? [
+          `Customer: ${reservation.customerName}`,
+          `Customer email: ${reservation.customerEmail}`,
+          `Customer phone: ${reservation.customerPhone}`,
+          '',
+        ]
+      : []),
+    ...rows.map(([label, value]) => `${label}: ${value}`),
+  ].join('\n')
+}
+
+function buildHtml(
+  greeting: string,
+  reservation: PendingReservationSummary,
+  instructions: ManualPaymentInstructions,
+  includeCustomerDetails = false,
+): string {
+  const rows = buildRows(reservation, instructions)
     .map(([label, value]) => `<tr><th align="left" style="padding:6px 12px 6px 0;">${escapeHtml(label)}</th><td style="padding:6px 0;">${escapeHtml(value)}</td></tr>`)
     .join('')
+  const customerRows = includeCustomerDetails
+    ? `<p><strong>Customer</strong>: ${escapeHtml(reservation.customerName)}<br /><strong>Email</strong>: ${escapeHtml(reservation.customerEmail)}<br /><strong>Phone</strong>: ${escapeHtml(reservation.customerPhone)}</p>`
+    : ''
 
+  return `<p>${escapeHtml(greeting)}</p><p>Your White Mountains Bike Rentals reservation has been received.</p><p><strong>Payment pending manual confirmation:</strong> send the amount below using the selected payment method. Your reservation is not confirmed until the owner independently verifies the payment.</p>${customerRows}<table>${rows}</table>`
+}
+
+export function buildReservationNotificationMessages(
+  reservation: PendingReservationSummary,
+  instructions: ManualPaymentInstructions,
+  configuration: Pick<ManualPaymentConfiguration, 'emailFrom' | 'ownerNotificationEmail'>,
+): { customer: ReservationEmailMessage; owner: ReservationEmailMessage } {
   return {
-    from,
-    to: reservation.customerEmail,
-    subject,
-    text,
-    html: `<p>Hi ${escapeHtml(reservation.customerName)},</p><p>Your PedalGo bike rental is confirmed.</p><table>${htmlRows}</table><p>Thank you for booking with PedalGo.</p>`,
+    customer: {
+      from: configuration.emailFrom,
+      to: reservation.customerEmail,
+      subject: `White Mountains reservation received: ${reservation.reference}`,
+      text: buildText(`Hi ${reservation.customerName},`, reservation, instructions),
+      html: buildHtml(`Hi ${reservation.customerName},`, reservation, instructions),
+    },
+    owner: {
+      from: configuration.emailFrom,
+      to: configuration.ownerNotificationEmail,
+      subject: `New White Mountains reservation: ${reservation.reference}`,
+      text: buildText('New reservation received.', reservation, instructions, true),
+      html: buildHtml('New reservation received.', reservation, instructions, true),
+    },
   }
 }
 
-export function createResendConfirmationEmailSender(): ConfirmationEmailSender {
+export function createResendReservationEmailSender(): ReservationEmailSender {
   const resend = new Resend(getRequiredEnv('RESEND_API_KEY'))
 
   return async (message) => {

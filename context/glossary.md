@@ -8,8 +8,9 @@
 - **Availability quote** — Public booking response for a requested pickup/return range that reports whether the featured bike type is available and, when available, includes rental days and total USD price.
 - **Pending-verification reservation** — A database reservation with status `pending_verification`, customer/rental details, USD total, assigned-bike hold metadata, and no implication that external payment was received.
 - **Manual payment method** — The typed reservation-level choice `venmo` or `zelle`; the selected method is persisted without provider API, webhook, or payment-record persistence.
-- **Manual payment verification** — An owner-controlled confirmation step planned for the admin workflow; reservation submission itself never confirms payment.
-- **Resend confirmation email** — Customer email sent after webhook-confirmed payment; includes reservation number, pickup/return times, total paid, pickup location, contact information, and pickup instructions.
+- **Manual payment verification** — An owner-controlled confirmation step planned for the admin workflow; reservation submission and notification delivery never confirm payment.
+- **Reservation-received notification** — Immediate customer and owner Resend messages sent after a reservation is saved; they include reservation/rental details, exact amount due, selected manual method, method-specific instructions, and explicit pending-manual-confirmation wording.
+- **Manual payment instructions** — UI-safe data for only the selected Venmo or Zelle method: recipient and exact-amount instructions tied to the reservation reference. Owner recipient and sender configuration are never returned.
 - **Featured rental option** — The single public MVP bike type shown in the customer flow, seeded as `bike-type-mvp-city-bike` / `PedalGo City Bike`.
 - **Bootstrap admin** — Initial active admin user created by `pnpm db:seed`; credentials are supplied through seed environment variables rather than committed to the repository.
 - **Admin session** — Signed HTTP-only cookie named `pedalgo_admin_session` that grants active administrators access to `/admin` routes for the current MVP session window.
