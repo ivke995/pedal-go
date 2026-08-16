@@ -10,7 +10,7 @@ Use this file first to find relevant durable context before changing code.
 - `context/glossary.md` — Project and domain terms.
 - `context/database/foundation.md` — Turso/libSQL, Drizzle setup, rental schema, domain services, env contract, and migration commands.
 - `context/admin/authentication.md` — Admin login, active-admin credential verification, signed session cookie, logout, and protected admin route boundaries.
-- `context/admin/dashboard.md` — Protected admin dashboard navigation, operations summary, reservation list/search, manual reservation creation, reservation cancellation, pricing management, availability-block management, and calendar boundaries.
+- `context/admin/dashboard.md` — Protected admin dashboard navigation, operations summary, reservation list/search, manual reservation creation, owner-controlled reservation verification, reservation cancellation, pricing management, availability-block management, and calendar boundaries.
 - `context/public-booking/availability.md` — Homepage availability quote flow, server action boundary, and no-side-effect booking entry behavior.
 - `context/public-booking/reservations.md` — Customer details/payment-method submission, pending reservation creation, selected-method instructions, notifications, and assigned-bike hold strategy.
 - `context/public-booking/payments.md` — Current reservation-level manual-payment boundary, $48/day rate, server-only Venmo/Zelle instructions, Resend notifications, no-payment-table contract, legacy provider modules, and follow-up task boundaries.
@@ -31,7 +31,7 @@ Use this file first to find relevant durable context before changing code.
 - `app/booking/page.tsx` — Booking route entry.
 - `app/booking/success/page.tsx` and `app/booking/cancel/page.tsx` — Legacy read-only provider-return pages retained temporarily until T05 cleanup; the active booking flow does not navigate to them.
 - `app/admin/(auth)/login/` — Admin sign-in route and login server action.
-- `app/admin/(dashboard)/` — Authenticated admin route group protected by the admin layout; includes summary, reservation list/search/manual creation/cancellation, pricing, availability-block management, calendar, and reports route boundaries.
+- `app/admin/(dashboard)/` — Authenticated admin route group protected by the admin layout; includes summary, reservation list/search/manual creation/verification/cancellation, pricing, availability-block management, calendar, and reports route boundaries.
 - `components/public/` — Public-facing page and search/availability components.
 - `components/booking/` — Details, Venmo/Zelle method selection, submission, and reservation-confirmation components.
 - `components/ui/` — Shared UI primitives.
@@ -40,12 +40,12 @@ Use this file first to find relevant durable context before changing code.
 - `lib/mock-data.ts` — Static featured city-bike fixture still used by public display components.
 - `lib/db/` — Database env validation, Turso/libSQL client, and Drizzle rental schema.
 - `lib/admin-auth/` — Server-only admin password verification, signed session cookie handling, and active-admin lookup.
-- `lib/admin-dashboard/` — Server-side admin dashboard summary, reservation list/search, manual reservation creation, reservation cancellation, pricing management, availability-block management, and calendar helpers.
+- `lib/admin-dashboard/` — Server-side admin dashboard summary, reservation list/search, manual reservation creation, owner-controlled reservation verification, reservation cancellation, pricing management, availability-block management, and calendar helpers.
 - `lib/domain/` — Server-side USD pricing and availability services for database-backed rental flows.
 - `lib/public-booking/` — Public booking orchestration, UI-safe availability quote results, reservation creation, server-side manual-payment instructions/notifications, and transitional fail-closed provider modules.
 - `scripts/seed.ts` — MVP city-bike inventory and bootstrap admin seed workflow.
 - `tests/domain/` — Unit tests for server-side pricing, date-range, and availability domain services.
-- `tests/admin-dashboard/` — Unit tests for admin dashboard server-side orchestration, including manual reservations, cancellation, pricing, availability blocks, and calendar helpers.
+- `tests/admin-dashboard/` — Unit tests for admin dashboard server-side orchestration, including manual reservations, verification, cancellation, pricing, availability blocks, and calendar helpers.
 - `tests/public-booking/` — Unit tests for public booking availability, reservation, and transitional provider boundaries.
 - `tests/public-booking/reservations.test.ts` — Unit tests for pending reservation validation, availability re-check, and insert behavior.
 - `tests/public-booking/checkout.test.ts` — Regression test that the legacy card-checkout boundary fails closed without provider persistence.

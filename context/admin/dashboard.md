@@ -6,7 +6,7 @@ PedalGo has a protected MVP administrator dashboard under `app/admin/(dashboard)
 
 - `app/admin/(dashboard)/layout.tsx` protects all dashboard routes with `requireAuthenticatedAdmin()` and renders the shared admin header, logout form, and dashboard navigation.
 - `app/admin/(dashboard)/page.tsx` renders `/admin` as the operations summary.
-- `app/admin/(dashboard)/reservations/page.tsx` renders the reservation list/search view, manual reservation creation form, and reservation cancellation controls.
+- `app/admin/(dashboard)/reservations/page.tsx` renders the reservation list/search view, manual reservation creation form, owner verification controls, and reservation cancellation controls.
 - `app/admin/(dashboard)/pricing/page.tsx` renders active bike-type daily-rate management.
 - `app/admin/(dashboard)/availability/page.tsx` renders availability-block creation, update, deletion, and listing for maintenance/inactive/internal-use windows.
 - `app/admin/(dashboard)/calendar/page.tsx` renders the month-navigation availability calendar/list hybrid.
@@ -37,8 +37,15 @@ The reservations page reads GET query parameters from `searchParams` and renders
 - `paymentMethod` filters by `PAYMENT_METHODS` or `none`; invalid values fall back to all methods.
 
 The table displays reservation reference, customer details, pickup/return window, rental duration, reservation status,
-persisted manual payment method, bike type, assigned bike code when present, total USD amount, and cancellation controls
-for cancellable rows. The query limits results to the newest 100 matching rows without payment joins.
+persisted manual payment method, pending-payment/amount-due messaging, verification metadata when present, bike type,
+assigned bike code when present, total USD amount, and controls for verification or cancellation. The query limits results
+to the newest 100 matching rows without payment joins.
+
+`lib/admin-dashboard/verification.ts` and `verifyReservationAction` implement the only owner verification boundary. The
+action requires an authenticated active admin, conditionally updates only a `pending_verification` reservation to
+`confirmed`, and appends `notes.verification` with the admin id/email/name, verification timestamp, and optional note.
+Cancelled, confirmed, completed, failed, and refunded reservations are rejected. The list keeps pending rows visibly
+unpaid and shows the recorded verifier after confirmation.
 
 ## Manual reservation creation
 

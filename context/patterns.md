@@ -26,6 +26,7 @@
 - Legacy Stripe checkout/webhook modules currently fail closed while the booking flow is migrated; provider artifact removal belongs to the later cleanup task.
 - Keep admin authentication server-only in `lib/admin-auth/`; admin route groups under `app/admin/(dashboard)/` should use the protected layout rather than client-side access checks.
 - Keep admin dashboard database reads and mutations server-side in `lib/admin-dashboard/`; protected admin pages/actions should import those helpers rather than importing the database client into client components.
+- Treat `pending_verification` as unpaid until the protected `verifyReservationAction` has authenticated an active admin and atomically moved the reservation to `confirmed`; append verifier identity, timestamp, and optional note to the existing structured reservation notes for audit visibility.
 - Keep only client-safe static display fixtures in `lib/mock-data.ts`; public booking availability, reservation, and status behavior must use database-backed server paths.
 - Reservation-received emails use an injected sender in tests and the existing Resend sender in the server action. A saved reservation remains `pending_verification` if either customer or owner notification delivery fails.
 - Keep database connection code under `lib/db/`; do not import the database client into client components.

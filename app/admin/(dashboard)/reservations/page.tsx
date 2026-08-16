@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { cancelReservationAction, createManualReservationAction } from "@/app/admin/actions";
+import { cancelReservationAction, createManualReservationAction, verifyReservationAction } from "@/app/admin/actions";
 import { canCancelAdminReservation } from "@/lib/admin-dashboard/cancellations";
 import {
   getAdminCreateReservationStatuses,
@@ -31,6 +31,8 @@ type AdminReservationsPageProps = {
     createError?: string | string[];
     cancelled?: string | string[];
     cancelError?: string | string[];
+    verified?: string | string[];
+    verifyError?: string | string[];
   }>;
 };
 
@@ -72,6 +74,8 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
   const createError = firstParam(params.createError).trim();
   const cancelledReference = firstParam(params.cancelled).trim();
   const cancelError = firstParam(params.cancelError).trim();
+  const verifiedReference = firstParam(params.verified).trim();
+  const verifyError = firstParam(params.verifyError).trim();
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">
@@ -171,6 +175,16 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
           {cancelError ? (
             <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
               {cancelError}
+            </div>
+          ) : null}
+          {verifiedReference ? (
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+              Confirmed reservation {verifiedReference} after recording manual payment verification.
+            </div>
+          ) : null}
+          {verifyError ? (
+            <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              {verifyError}
             </div>
           ) : null}
           <form action={createManualReservationAction} className="grid gap-4 md:grid-cols-2">
@@ -305,22 +319,52 @@ export default async function AdminReservationsPage({ searchParams }: AdminReser
                     </TableCell>
                     <TableCell>
                        <PaymentMethodBadge method={reservation.paymentMethod} />
+                       <div className="mt-1 text-xs text-muted-foreground">
+                         {reservation.reservationStatus === "pending_verification"
+                           ? "Payment pending manual confirmation"
+                           : reservation.paymentMethod !== "none"
+                             ? "Manual payment method"
+                             : "No payment method recorded"}
+                       </div>
+                       <div className="mt-1 text-xs text-muted-foreground">
+                         Amount due {formatCurrency(reservation.totalUsdCents / 100)}
+                       </div>
+                       {reservation.verification ? (
+                         <div className="mt-1 text-xs text-muted-foreground">
+                           Verified {formatDateTime(reservation.verification.verifiedAt)} by {reservation.verification.verifiedBy.name ?? reservation.verification.verifiedBy.email}
+                         </div>
+                       ) : null}
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(reservation.totalUsdCents / 100)}
                     </TableCell>
                     <TableCell>
-                      {cancellable ? (
-                        <form action={cancelReservationAction} className="flex min-w-48 flex-col gap-2">
-                          <input type="hidden" name="reservationId" value={reservation.id} />
-                          <Input name="reason" placeholder="Cancellation note" aria-label={`Cancellation note for ${reservation.reference}`} />
-                          <Button type="submit" variant="outline" size="sm">
-                            Cancel reservation
-                          </Button>
-                        </form>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Not cancellable</span>
-                      )}
+                      <div className="flex min-w-48 flex-col gap-3">
+                        {reservation.reservationStatus === "pending_verification" ? (
+                          <form action={verifyReservationAction} className="flex flex-col gap-2">
+                            <input type="hidden" name="reservationId" value={reservation.id} />
+                            <Input
+                              name="verificationNote"
+                              placeholder="Verification note (optional)"
+                              aria-label={`Verification note for ${reservation.reference}`}
+                            />
+                            <Button type="submit" size="sm">
+                              Verify payment & confirm
+                            </Button>
+                          </form>
+                        ) : null}
+                        {cancellable ? (
+                          <form action={cancelReservationAction} className="flex flex-col gap-2">
+                            <input type="hidden" name="reservationId" value={reservation.id} />
+                            <Input name="reason" placeholder="Cancellation note" aria-label={`Cancellation note for ${reservation.reference}`} />
+                            <Button type="submit" variant="outline" size="sm">
+                              Cancel reservation
+                            </Button>
+                          </form>
+                        ) : reservation.reservationStatus !== "pending_verification" ? (
+                          <span className="text-xs text-muted-foreground">Not cancellable</span>
+                        ) : null}
+                      </div>
                     </TableCell>
                   </TableRow>
                   );
