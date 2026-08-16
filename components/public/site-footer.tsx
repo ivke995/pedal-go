@@ -1,105 +1,75 @@
 import Link from 'next/link'
-import { MapPin, Phone, Mail, Clock, Camera, Share2, Send } from 'lucide-react'
+import { Camera, MapPin, Phone } from 'lucide-react'
 import { BrandLogo } from '@/components/brand-logo'
 
 const FOOTER_LINKS = [
-  { href: '/#home', label: 'Home' },
+  { href: '/#rentals', label: 'Rentals' },
   { href: '/#how-it-works', label: 'How It Works' },
   { href: '/#pricing', label: 'Pricing' },
   { href: '/#faq', label: 'FAQ' },
   { href: '/admin/login', label: 'Admin' },
 ]
 
-const CONTACT = [
-  { icon: MapPin, label: 'Obala Kulina bana 12, Sarajevo' },
-  { icon: Phone, label: '+387 33 000 000' },
-  { icon: Mail, label: 'hello@pedalgo.example' },
-  { icon: Clock, label: 'Mon–Sun · 08:00 – 20:00' },
-]
-
-const SOCIALS = [
-  { icon: Camera, label: 'Instagram' },
-  { icon: Share2, label: 'Facebook' },
-  { icon: Send, label: 'Twitter' },
-]
-
 export function SiteFooter() {
   return (
-    <footer id="contact" className="scroll-mt-20 border-t border-border bg-secondary/40">
-      <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col gap-4">
-            <BrandLogo href="" />
-            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground text-pretty">
-              Rent a well-maintained bike online in minutes. Flexible pickup
-              times and friendly local support.
+    <footer id="contact" className="scroll-mt-20 bg-[var(--wm-navy)] text-white">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <div className="grid gap-12 md:grid-cols-[1.3fr_0.7fr_0.9fr]">
+          <div className="flex flex-col items-start gap-5">
+            <BrandLogo href="" variant="onDark" />
+            <p className="max-w-sm text-sm leading-relaxed text-white/65 text-pretty">
+              White Mountains bike rentals for scenic days in Lincoln,
+              Woodstock, and the surrounding mountains.
             </p>
-            <div className="flex items-center gap-2">
-              {SOCIALS.map((social) => (
-                <a
-                  key={social.label}
-                  href="#"
-                  aria-label={social.label}
-                  className="flex size-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:text-primary"
-                >
-                  <social.icon className="size-4" aria-hidden="true" />
-                </a>
-              ))}
+            <div className="flex flex-wrap gap-3">
+              <a
+                href="tel:603-348-1320"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[var(--wm-gold)] px-4 text-sm font-semibold text-[var(--wm-navy)] transition-colors hover:bg-[#d0ab70] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              >
+                <Phone className="size-4" aria-hidden="true" />
+                (603) 348-1320
+              </a>
+              <span className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/15 px-4 text-sm text-white/75">
+                <Camera className="size-4" aria-hidden="true" />
+                @whitemountainsbikerentals
+              </span>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <h3 className="font-heading text-sm font-semibold text-foreground">
-              Contact
-            </h3>
-            <ul className="flex flex-col gap-3">
-              {CONTACT.map((item) => (
-                <li
-                  key={item.label}
-                  className="flex items-start gap-2.5 text-sm text-muted-foreground"
-                >
-                  <item.icon
-                    className="mt-0.5 size-4 shrink-0 text-primary"
-                    aria-hidden="true"
-                  />
-                  {item.label}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <h3 className="font-heading text-sm font-semibold text-foreground">
+          <div>
+            <h2 className="font-display text-2xl font-semibold uppercase tracking-wide text-[var(--wm-gold)]">
               Explore
-            </h3>
-            <ul className="flex flex-col gap-2">
-              {FOOTER_LINKS.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            </h2>
+            <nav aria-label="Footer" className="mt-4">
+              <ul className="flex flex-col gap-3">
+                {FOOTER_LINKS.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-white/65 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wm-gold)]"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <h3 className="font-heading text-sm font-semibold text-foreground">
-              Pickup location
-            </h3>
-            <p className="text-sm leading-relaxed text-muted-foreground text-pretty">
-              Central riverside shop, a short walk from the Old Town. Look for
-              the green PedalGo sign.
-            </p>
+          <div>
+            <h2 className="font-display text-2xl font-semibold uppercase tracking-wide text-[var(--wm-gold)]">
+              Find us here
+            </h2>
+            <div className="mt-4 flex items-start gap-3 text-sm leading-relaxed text-white/65">
+              <MapPin className="mt-0.5 size-4 shrink-0 text-[var(--wm-blue)]" aria-hidden="true" />
+              <p>Serving Lincoln, Woodstock, and the White Mountains.</p>
+            </div>
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row">
-          <p>&copy; {new Date().getFullYear()} PedalGo. All rights reserved.</p>
-          <p>Made for riders in the city and beyond.</p>
+        <div className="mt-14 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between">
+          <p>&copy; {new Date().getFullYear()} White Mountains Bike Rentals.</p>
+          <p>Explore more. Ride more.</p>
         </div>
       </div>
     </footer>

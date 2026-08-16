@@ -44,10 +44,10 @@ export function PriceSummary({ draft, className }: PriceSummaryProps) {
       />
       <Separator />
       <div className="flex items-baseline justify-between gap-4">
-        <dt className="font-heading text-base font-semibold text-foreground">
+        <dt className="font-display text-xl font-semibold uppercase text-foreground">
           Total
         </dt>
-        <dd className="font-heading text-2xl font-bold text-primary">
+        <dd className="font-display text-3xl font-bold text-[var(--wm-forest)]">
           {formatCurrency(draft.total)}
         </dd>
       </div>

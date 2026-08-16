@@ -24,16 +24,16 @@ export function FeatureCard({
       )}
     >
       <div className="flex items-center gap-3">
-        <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <span className="flex size-11 items-center justify-center rounded-xl bg-[var(--wm-forest)] text-white">
           <Icon className="size-5" aria-hidden="true" />
         </span>
         {step ? (
-          <span className="font-heading text-sm font-bold text-muted-foreground">
-            {`Step ${step}`}
+            <span className="font-display text-2xl font-semibold uppercase tracking-wide text-[var(--wm-gold)]">
+              {`0${step}`}
           </span>
         ) : null}
       </div>
-      <h3 className="font-heading text-lg font-semibold text-foreground text-balance">
+      <h3 className="font-display text-3xl font-semibold uppercase leading-none text-[var(--wm-navy)] text-balance">
         {title}
       </h3>
       <p className="text-sm leading-relaxed text-muted-foreground text-pretty">

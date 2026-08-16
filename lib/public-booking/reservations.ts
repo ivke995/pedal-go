@@ -11,6 +11,7 @@ import {
 } from './confirmation-email'
 import {
   FEATURED_BIKE_TYPE_ID,
+  FEATURED_BIKE_DISPLAY_NAME,
   type AvailabilityQuoteInput,
   validateAvailabilityQuoteInput,
 } from './availability'
@@ -254,7 +255,7 @@ export async function createPendingReservation(
   if (!availability.bikeType || !availability.isAvailable) {
     return {
       status: 'unavailable',
-      message: 'No PedalGo City Bikes are available for the selected dates. Please choose another time.',
+       message: 'No city bikes are available for the selected dates. Please choose another time.',
     }
   }
 
@@ -302,7 +303,7 @@ export async function createPendingReservation(
   )
   const reservation = toPublicSummary(
     created,
-    availability.bikeType.name,
+     FEATURED_BIKE_DISPLAY_NAME,
     holdExpiresAt,
     paymentInstructions,
   )

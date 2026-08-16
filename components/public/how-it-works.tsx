@@ -1,4 +1,4 @@
-import { CalendarDays, CreditCard, Bike } from 'lucide-react'
+import { CalendarDays, ClipboardCheck, Bike } from 'lucide-react'
 import { FeatureCard } from '@/components/public/feature-card'
 
 const STEPS = [
@@ -9,32 +9,36 @@ const STEPS = [
       'Select your pickup and return date and time, then check availability instantly.',
   },
   {
-    icon: CreditCard,
-    title: 'Pay Online',
+    icon: ClipboardCheck,
+    title: 'Choose how to pay',
     description:
-      'Confirm your details and pay securely online. No queues, no paperwork.',
+      'Choose Venmo or Zelle, then receive simple instructions for the exact rental total.',
   },
   {
     icon: Bike,
     title: 'Pick Up Your Bike',
     description:
-      'Show your reservation number at our shop and hit the road on a freshly serviced bike.',
+      'We confirm your reservation manually, deliver to your hotel, and get you rolling.',
   },
 ]
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="scroll-mt-20 py-16 sm:py-24">
+    <section id="how-it-works" className="scroll-mt-20 bg-[var(--wm-offwhite)] py-24 sm:py-32">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-3 text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary">
-            How it works
-          </p>
-          <h2 className="font-heading text-3xl font-bold tracking-tight text-foreground text-balance sm:text-4xl">
-            Three simple steps to your ride
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--wm-forest)]">
+              How it works
+            </p>
+          <h2 className="font-display text-5xl font-bold uppercase leading-none tracking-tight text-[var(--wm-navy)] text-balance sm:text-6xl">
+            Adventure, made simple
           </h2>
+          <p className="max-w-xl text-muted-foreground text-pretty">
+            From first click to first turn, we keep the rental process easy so
+            you can spend more time outside.
+          </p>
         </div>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <div className="relative mt-12 grid gap-6 md:grid-cols-3 md:gap-0">
           {STEPS.map((step, i) => (
             <FeatureCard
               key={step.title}
@@ -42,6 +46,7 @@ export function HowItWorks() {
               title={step.title}
               description={step.description}
               step={i + 1}
+              className="rounded-none border-y border-x-0 bg-transparent p-6 shadow-none first:border-l md:border-y-0 md:border-l md:first:border-l-0"
             />
           ))}
         </div>

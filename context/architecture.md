@@ -4,13 +4,13 @@
 
 - `app/` — Next.js App Router routes and root layout.
   - `app/actions/` contains server actions used by client components for server-side domain work.
-  - `app/page.tsx` composes the public landing page.
+  - `app/page.tsx` composes the public White Mountains landing page.
   - `app/booking/page.tsx` hosts the booking flow inside `Suspense`.
   - `app/admin/(auth)/login/` renders `/admin/login` and submits admin credentials through a server action.
   - `app/admin/(dashboard)/` contains the protected admin dashboard shell; its layout redirects unauthenticated users to `/admin/login` and renders shared navigation for summary, reservations, pricing, availability, calendar, and reports sections.
   - `app/layout.tsx` defines metadata, fonts, analytics, and global toaster.
 - `components/` — reusable React components.
-  - `components/public/` contains public-site and booking-search presentation components.
+  - `components/public/` contains public-site sections (hero, responsive header/footer, rentals, benefits, how-it-works, pricing, service area, FAQ, final CTA) and booking-search presentation components.
   - `components/booking/` contains the details → payment-method → reservation-confirmation UI flow.
   - `components/ui/` contains shadcn/Base UI-style primitives.
 - `lib/` — shared utilities, domain types, static featured-bike display data, pricing logic, domain services, and database boundary.
@@ -27,6 +27,12 @@
 - `tests/domain/` — Node test-runner unit tests for server-side pricing, date-range, and availability domain behavior.
 - `tests/admin-dashboard/` — Node test-runner tests for admin dashboard server-side orchestration.
 - `tests/public-booking/` — Node test-runner tests for public booking server-side orchestration.
+
+## Public landing page
+
+The public `/` route is a composition of maintainable sections under `components/public/`. It uses the interim `BrandLogo`, existing bike assets, the `Barlow Condensed` display font, and scoped White Mountains palette variables (`--wm-navy`, `--wm-forest`, `--wm-olive`, `--wm-offwhite`, `--wm-blue`, `--wm-gold`) defined in `app/globals.css`. Public calls to action link to `/booking`; the hero keeps the existing availability server action before that route.
+
+Public copy is limited to the supplied phone number, Instagram handle, Lincoln/Woodstock/White Mountains service area, current `$48/day` rate, and free hotel delivery/pickup message. No public email, street address, or fabricated social destination is provided.
 
 ## Data and backend state
 

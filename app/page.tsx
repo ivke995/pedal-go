@@ -5,6 +5,8 @@ import { FeaturedBike } from '@/components/public/featured-bike'
 import { WhyChoose } from '@/components/public/why-choose'
 import { PricingSection } from '@/components/public/pricing-section'
 import { FaqSection } from '@/components/public/faq-section'
+import { ServiceArea } from '@/components/public/service-area'
+import { FinalCta } from '@/components/public/final-cta'
 import { SiteFooter } from '@/components/public/site-footer'
 
 export default function HomePage() {
@@ -17,7 +19,9 @@ export default function HomePage() {
         <FeaturedBike />
         <WhyChoose />
         <PricingSection />
+        <ServiceArea />
         <FaqSection />
+        <FinalCta />
       </main>
       <SiteFooter />
     </div>

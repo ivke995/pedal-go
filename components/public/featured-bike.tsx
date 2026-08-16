@@ -12,21 +12,26 @@ export function FeaturedBike() {
   }
 
   return (
-    <section className="py-16 sm:py-24">
-      <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
+    <section id="rentals" className="scroll-mt-20 bg-white py-24 sm:py-32">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div className="flex flex-col gap-4">
-            <p className="text-sm font-semibold uppercase tracking-widest text-primary">
-              Featured rental
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--wm-forest)]">
+              The fleet
             </p>
-            <h2 className="font-heading text-3xl font-bold tracking-tight text-foreground text-balance sm:text-4xl">
-              Meet the PedalGo City Bike
+            <h2 className="font-display text-5xl font-bold uppercase leading-none tracking-tight text-[var(--wm-navy)] text-balance sm:text-6xl">
+              One great bike. Every kind of day.
             </h2>
-            <p className="text-muted-foreground text-pretty">
-              Our do-it-all city bike is comfortable, reliable, and ready for
-              anything from a riverside cruise to a day of sightseeing. More
-              bike types are on the way.
+            <p className="max-w-lg text-muted-foreground text-pretty">
+              Our comfortable city bike is easy to ride and ready for scenic
+              loops, town errands, and everything between. The current fleet is
+              small, personal, and regularly maintained.
             </p>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--wm-forest)]">
+              <span className="rounded-full bg-[var(--wm-offwhite)] px-3 py-2">Comfort first</span>
+              <span className="rounded-full bg-[var(--wm-offwhite)] px-3 py-2">Lock included</span>
+              <span className="rounded-full bg-[var(--wm-offwhite)] px-3 py-2">Safety checked</span>
+            </div>
           </div>
           <BikeCard bike={cityBike} onSelect={scrollToBooking} />
         </div>

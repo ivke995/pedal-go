@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Plus_Jakarta_Sans, Inter } from 'next/font/google'
+import { Barlow_Condensed, Plus_Jakarta_Sans, Inter } from 'next/font/google'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
@@ -16,11 +16,17 @@ const inter = Inter({
   display: 'swap',
 })
 
+const display = Barlow_Condensed({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+  weight: ['500', '600', '700'],
+})
+
 export const metadata: Metadata = {
-  title: 'PedalGo — Rent a Bike in Just a Few Clicks',
+  title: 'White Mountains Bike Rentals | Ride More',
   description:
-    'PedalGo lets you book a well-maintained bicycle online in minutes. Choose your dates, pay securely, and pick up your bike. Flexible pickup times and friendly local support.',
-  generator: 'v0.app',
+    'Explore Lincoln, Woodstock, and the White Mountains by bike. Reserve a city bike for $48/day with free hotel delivery and pickup.',
   icons: {
     icon: [
       {
@@ -42,7 +48,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: 'light',
-  themeColor: '#3d8b5f',
+  themeColor: '#102f3a',
   width: 'device-width',
   initialScale: 1,
 }
@@ -53,7 +59,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${inter.variable} bg-background`}>
+    <html
+      lang="en"
+      className={`${jakarta.variable} ${inter.variable} ${display.variable} bg-background`}
+    >
       <body className="font-sans antialiased">
         {children}
         <Toaster position="top-center" />

@@ -14,6 +14,7 @@ Use this file first to find relevant durable context before changing code.
 - `context/public-booking/availability.md` — Homepage availability quote flow, server action boundary, and no-side-effect booking entry behavior.
 - `context/public-booking/reservations.md` — Customer details/payment-method submission, pending reservation creation, selected-method instructions, notifications, and assigned-bike hold strategy.
 - `context/public-booking/payments.md` — Current reservation-level manual-payment boundary, $48/day rate, server-only Venmo/Zelle instructions, Resend notifications, no-payment-table contract, and owner verification.
+- `context/public-site/landing-page.md` — Current White Mountains public landing-page composition, visual/content contract, assets, and accessible navigation boundaries.
 - `context/decisions/pedalgo-mvp-architecture-product.md` — Accepted MVP product, architecture, provider, status, and non-goal decisions.
 - `README.md` — Human-facing setup and deployment environment contract for Turso/libSQL, manual payment configuration, Resend, admin bootstrap/session secrets, local development, and deployment checklist.
 
