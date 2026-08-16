@@ -40,7 +40,7 @@ const validInput = {
 
 const paymentConfig = {
   venmoHandle: '@white-mountains',
-  zelleRecipient: 'payments@example.test',
+    zelleRecipient: 'zelle@example.test',
   ownerNotificationEmail: 'owner@example.test',
   emailFrom: 'White Mountains <bookings@example.test>',
 }

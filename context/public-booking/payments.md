@@ -1,6 +1,6 @@
 # Public Booking Payment Boundary
 
-Public reservations no longer persist provider payment records. The reservation-level manual-payment contract, customer
+Public reservations do not persist provider payment records. The reservation-level manual-payment contract, customer
 submission UI, server-side instruction/notification boundary, and protected owner-verification transition are implemented.
 
 ## Current contract
@@ -22,19 +22,10 @@ submission UI, server-side instruction/notification boundary, and protected owne
   the selected method. The confirmation view shows only the returned method's recipient/instructions, reservation
   reference, rental details, exact amount, hold expiry, and explicit `Payment pending manual confirmation` wording.
 - Loading, validation, retry, and notification-delivery failure states remain in the booking flow without claiming that
-  payment was received. The active flow does not navigate to provider success/cancel routes.
+  payment was received. The active flow has no provider success/cancel routes.
 - No `payments` table, provider identifiers, checkout session persistence, or automatic payment confirmation exists in the
   current schema.
-- Legacy checkout/status/webhook module boundaries fail closed while the booking flow is migrated; they do not mutate
-  reservations.
+- No checkout, status lookup, webhook, provider identifier, or payment persistence boundary exists. Only the protected admin
+  verification action can change `pending_verification` to `confirmed`.
 
-## Planned follow-up boundaries
-
-- T02 is complete: it adds server-only Venmo/Zelle instructions and immediate Resend notifications.
-- T03 is complete: the customer checkout UI uses method selection and reservation-received instructions.
-- T04 is complete: an authenticated active admin can independently verify an externally received payment and transition
-  a pending reservation to `confirmed`; the action records verifier identity, timestamp, and optional note in reservation
-  metadata. No public action, notification, or provider callback performs this transition.
-- T05 removes remaining provider routes, modules, dependency, tests, and stale deployment documentation.
-
-See also: [reservations](reservations.md), [availability](availability.md), [database foundation](../database/foundation.md).
+See also: [reservations](reservations.md), [availability](availability.md), and [database foundation](../database/foundation.md).
