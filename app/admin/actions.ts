@@ -9,6 +9,7 @@ import { cancelReservation } from "@/lib/admin-dashboard/cancellations";
 import { clearAdminSession } from "@/lib/admin-auth/session";
 import { createManualReservation } from "@/lib/admin-dashboard/manual-reservations";
 import { updateBikeTypeDailyPrice } from "@/lib/admin-dashboard/pricing";
+import { verifyReservation } from "@/lib/admin-dashboard/verification";
 
 export async function logoutAdmin(): Promise<void> {
   await clearAdminSession();
@@ -53,6 +54,30 @@ export async function cancelReservationAction(formData: FormData): Promise<void>
   }
 
   redirect(`/admin/reservations?cancelError=${encodeURIComponent(result.message)}`);
+}
+
+export async function verifyReservationAction(formData: FormData): Promise<void> {
+  const admin = await requireAuthenticatedAdmin();
+
+  const result = await verifyReservation(
+    {
+      reservationId: String(formData.get("reservationId") ?? ""),
+      note: String(formData.get("verificationNote") ?? ""),
+    },
+    admin,
+  );
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/reservations");
+  revalidatePath("/admin/calendar");
+  revalidatePath("/");
+  revalidatePath("/booking");
+
+  if (result.status === "verified") {
+    redirect(`/admin/reservations?verified=${encodeURIComponent(result.reservation.reference)}`);
+  }
+
+  redirect(`/admin/reservations?verifyError=${encodeURIComponent(result.message)}`);
 }
 
 export async function updateBikeTypeDailyPriceAction(formData: FormData): Promise<void> {

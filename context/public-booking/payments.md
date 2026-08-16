@@ -1,7 +1,7 @@
 # Public Booking Payment Boundary
 
 Public reservations no longer persist provider payment records. The reservation-level manual-payment contract, customer
-submission UI, and server-side instruction/notification boundary are implemented; owner verification remains a follow-up task.
+submission UI, server-side instruction/notification boundary, and protected owner-verification transition are implemented.
 
 ## Current contract
 
@@ -32,7 +32,9 @@ submission UI, and server-side instruction/notification boundary are implemented
 
 - T02 is complete: it adds server-only Venmo/Zelle instructions and immediate Resend notifications.
 - T03 is complete: the customer checkout UI uses method selection and reservation-received instructions.
-- T04 adds the authenticated owner verification transition from `pending_verification` to `confirmed`.
+- T04 is complete: an authenticated active admin can independently verify an externally received payment and transition
+  a pending reservation to `confirmed`; the action records verifier identity, timestamp, and optional note in reservation
+  metadata. No public action, notification, or provider callback performs this transition.
 - T05 removes remaining provider routes, modules, dependency, tests, and stale deployment documentation.
 
 See also: [reservations](reservations.md), [availability](availability.md), [database foundation](../database/foundation.md).

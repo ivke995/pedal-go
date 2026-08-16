@@ -103,12 +103,16 @@ Replace the Stripe/payment-provider flow completely with a manual external-payme
    - Evidence: `pnpm test` passed (41 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed. Booking flow now submits only after method selection, returns selected-method instructions, and renders a pending manual-confirmation summary.
    - Notes: The existing `/booking/success` and `/booking/cancel` provider-return routes remain transitional artifacts for T05 cleanup, but the active booking flow no longer links to or imports them.
 
-- [ ] T04: `Add owner-controlled manual reservation verification` (status:todo)
+- [x] T04: `Add owner-controlled manual reservation verification` (status:done)
   - Task ID: T04
   - Goal: Give authenticated owners a clear, explicit way to verify an externally received payment without any automatic transition.
   - Boundaries (in/out of scope): In — adapt admin reservation list/detail data to show payment method, amount due, and `pending_verification`; add a protected confirm/verify action from pending-verification to confirmed with timestamp/notes; update cancellation and availability conflict rules; replace payment filters/metrics/revenue joins with reservation-status-derived values; preserve audit-friendly status messaging. Out — refund automation, Venmo/Zelle verification, public self-service status mutation, and new admin authentication.
-  - Done when: Only an authenticated admin action can mark a reservation confirmed; the action rejects cancelled/invalid states, records who/when or equivalent notes, and pending reservations remain visibly unpaid until that action; admin list, summary, calendar, manual creation, cancellation, and tests no longer require a payments table.
-  - Verification notes (commands or checks): Add/update admin-dashboard tests for valid/invalid transitions, status counts, list rendering, cancellation, availability conflicts, and payment-method display; manually verify protected route behavior and confirmation copy.
+   - Done when: Only an authenticated admin action can mark a reservation confirmed; the action rejects cancelled/invalid states, records who/when or equivalent notes, and pending reservations remain visibly unpaid until that action; admin list, summary, calendar, manual creation, cancellation, and tests no longer require a payments table.
+   - Verification notes (commands or checks): Add/update admin-dashboard tests for valid/invalid transitions, status counts, list rendering, cancellation, availability conflicts, and payment-method display; manually verify protected route behavior and confirmation copy.
+   - Completed: 2026-08-16
+   - Files changed: `app/admin/actions.ts`, `app/admin/(dashboard)/reservations/page.tsx`, `lib/admin-dashboard/verification.ts`, `lib/admin-dashboard/reservations.ts`, and `tests/admin-dashboard/verification.test.ts`
+   - Evidence: Focused admin-dashboard tests passed (11 tests); full `pnpm test` passed (44 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed. The protected action accepts only `pending_verification`, records admin identity/timestamp/optional note in reservation metadata, and the reservation list exposes pending-payment messaging, amount due, verification metadata, and the confirm action.
+   - Notes: Existing status-derived summary, calendar, cancellation, manual-reservation, and availability boundaries already treated `pending_verification` as capacity-consuming and required no payment-table changes. Verification metadata is appended to existing reservation notes to avoid a schema migration. Browser/manual route smoke testing remains part of final T07 validation.
 
 - [ ] T05: `Remove Stripe infrastructure and stale provider artifacts` (status:todo)
   - Task ID: T05

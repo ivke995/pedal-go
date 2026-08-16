@@ -12,6 +12,7 @@ import {
   type PaymentMethod,
   type ReservationStatus,
 } from "@/lib/db/schema";
+import { parseReservationVerification, type ReservationVerification } from "@/lib/admin-dashboard/verification";
 
 export const ADMIN_RESERVATION_LIST_LIMIT = 100;
 
@@ -39,6 +40,7 @@ export type AdminReservationListItem = {
   paymentMethod: AdminReservationPaymentMethod;
   createdAt: Date;
   updatedAt: Date;
+  verification: ReservationVerification | null;
 };
 
 export type AdminReservationListResult = {
@@ -129,6 +131,7 @@ export async function getAdminReservations(
       paymentMethod: row.paymentMethod ?? "none",
       createdAt: row.reservation.createdAt,
       updatedAt: row.reservation.updatedAt,
+      verification: parseReservationVerification(row.reservation.notes),
     });
   }
 
