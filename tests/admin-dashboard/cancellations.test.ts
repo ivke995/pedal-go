@@ -19,9 +19,10 @@ const baseReservation: Row = {
   pickupAt: new Date("2026-07-20T10:00:00.000Z"),
   returnAt: new Date("2026-07-22T10:00:00.000Z"),
   rentalDays: 2,
-  dailyRateUsdCents: 2500,
+  dailyRateUsdCents: 4800,
   totalUsdCents: 5000,
   status: "confirmed",
+  paymentMethod: null,
   notes: JSON.stringify({ source: "admin_manual", adminNote: "VIP" }),
   createdAt: new Date("2026-07-16T10:00:00.000Z"),
   updatedAt: new Date("2026-07-16T10:00:00.000Z"),
@@ -109,9 +110,9 @@ describe("admin reservation cancellation", () => {
     assert.equal(database.updates.length, 0);
   });
 
-  it("only treats pending and confirmed reservations as cancellable", () => {
-    const statuses: ReservationStatus[] = ["pending", "confirmed", "cancelled", "completed", "failed", "refunded"];
+  it("only treats pending verification and confirmed reservations as cancellable", () => {
+    const statuses: ReservationStatus[] = ["pending_verification", "confirmed", "cancelled", "completed", "failed", "refunded"];
 
-    assert.deepEqual(statuses.filter(canCancelAdminReservation), ["pending", "confirmed"]);
+    assert.deepEqual(statuses.filter(canCancelAdminReservation), ["pending_verification", "confirmed"]);
   });
 });

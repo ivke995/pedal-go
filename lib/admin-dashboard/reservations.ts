@@ -6,22 +6,21 @@ import { db } from "@/lib/db/client";
 import {
   bikeTypes,
   bikes,
-  payments,
   reservations,
-  PAYMENT_STATUSES,
+  PAYMENT_METHODS,
   RESERVATION_STATUSES,
-  type PaymentStatus,
+  type PaymentMethod,
   type ReservationStatus,
 } from "@/lib/db/schema";
 
 export const ADMIN_RESERVATION_LIST_LIMIT = 100;
 
-export type AdminReservationPaymentStatus = PaymentStatus | "none";
+export type AdminReservationPaymentMethod = PaymentMethod | "none";
 
 export type AdminReservationFilters = {
   search?: string;
   reservationStatus?: ReservationStatus | "all";
-  paymentStatus?: AdminReservationPaymentStatus | "all";
+  paymentMethod?: AdminReservationPaymentMethod | "all";
 };
 
 export type AdminReservationListItem = {
@@ -37,8 +36,7 @@ export type AdminReservationListItem = {
   reservationStatus: ReservationStatus;
   bikeTypeName: string;
   bikeCode: string | null;
-  paymentStatus: AdminReservationPaymentStatus;
-  paymentProvider: string | null;
+  paymentMethod: AdminReservationPaymentMethod;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -53,17 +51,17 @@ export function parseReservationStatus(value: string | undefined): ReservationSt
   return RESERVATION_STATUSES.includes(value as ReservationStatus) ? (value as ReservationStatus) : "all";
 }
 
-export function parsePaymentStatus(value: string | undefined): AdminReservationPaymentStatus | "all" {
+export function parsePaymentMethod(value: string | undefined): AdminReservationPaymentMethod | "all" {
   if (value === "none") return "none";
 
-  return PAYMENT_STATUSES.includes(value as PaymentStatus) ? (value as PaymentStatus) : "all";
+  return PAYMENT_METHODS.includes(value as PaymentMethod) ? (value as PaymentMethod) : "all";
 }
 
 export function normalizeAdminReservationFilters(filters: AdminReservationFilters): Required<AdminReservationFilters> {
   return {
     search: filters.search?.trim() ?? "",
     reservationStatus: filters.reservationStatus ?? "all",
-    paymentStatus: filters.paymentStatus ?? "all",
+    paymentMethod: filters.paymentMethod ?? "all",
   };
 }
 
@@ -77,10 +75,10 @@ export async function getAdminReservations(
     conditions.push(eq(reservations.status, normalized.reservationStatus));
   }
 
-  if (normalized.paymentStatus === "none") {
-    conditions.push(isNull(payments.id));
-  } else if (normalized.paymentStatus !== "all") {
-    conditions.push(eq(payments.status, normalized.paymentStatus));
+  if (normalized.paymentMethod === "none") {
+    conditions.push(isNull(reservations.paymentMethod));
+  } else if (normalized.paymentMethod !== "all") {
+    conditions.push(eq(reservations.paymentMethod, normalized.paymentMethod));
   }
 
   if (normalized.search) {
@@ -101,15 +99,13 @@ export async function getAdminReservations(
       reservation: reservations,
       bikeTypeName: bikeTypes.name,
       bikeCode: bikes.code,
-      paymentStatus: payments.status,
-      paymentProvider: payments.provider,
+      paymentMethod: reservations.paymentMethod,
     })
     .from(reservations)
     .innerJoin(bikeTypes, eq(reservations.bikeTypeId, bikeTypes.id))
     .leftJoin(bikes, eq(reservations.bikeId, bikes.id))
-    .leftJoin(payments, eq(payments.reservationId, reservations.id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(reservations.createdAt), desc(payments.updatedAt))
+    .orderBy(desc(reservations.createdAt))
     .limit(ADMIN_RESERVATION_LIST_LIMIT);
 
   const reservationsById = new Map<string, AdminReservationListItem>();
@@ -130,8 +126,7 @@ export async function getAdminReservations(
       reservationStatus: row.reservation.status,
       bikeTypeName: row.bikeTypeName,
       bikeCode: row.bikeCode,
-      paymentStatus: row.paymentStatus ?? "none",
-      paymentProvider: row.paymentProvider,
+      paymentMethod: row.paymentMethod ?? "none",
       createdAt: row.reservation.createdAt,
       updatedAt: row.reservation.updatedAt,
     });

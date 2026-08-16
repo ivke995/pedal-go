@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import { reservations } from '@/lib/db/schema'
 import { getBikeAvailability } from '@/lib/domain/availability'
-import { quoteRentalPrice } from '@/lib/domain/pricing'
+import { CURRENT_DAILY_RATE_USD_CENTS, quoteRentalPrice } from '@/lib/domain/pricing'
 import type { BookingDraft } from '@/lib/types'
 import {
   FEATURED_BIKE_TYPE_ID,
@@ -41,7 +41,7 @@ export type PendingReservationSummary = {
   rentalDays: number
   dailyRateUsdCents: number
   totalUsdCents: number
-  status: 'pending'
+  status: 'pending_verification'
   holdExpiresAt: string
   draft: BookingDraft
 }
@@ -119,7 +119,7 @@ function toPublicSummary(
     rentalDays: row.rentalDays,
     dailyRateUsdCents: row.dailyRateUsdCents,
     totalUsdCents: row.totalUsdCents,
-    status: 'pending',
+    status: 'pending_verification',
     holdExpiresAt: holdExpiresAt.toISOString(),
     draft: {
       pickupAt: row.pickupAt.toISOString(),
@@ -169,7 +169,7 @@ export async function createPendingReservation(
   const quote = quoteRentalPrice(
     dateValidation.pickupAt,
     dateValidation.returnAt,
-    availability.bikeType.dailyRateUsdCents,
+    CURRENT_DAILY_RATE_USD_CENTS,
   )
   const now = options.now ?? new Date()
   const holdExpiresAt = new Date(now.getTime() + HOLD_MINUTES * 60 * 1000)
@@ -189,7 +189,7 @@ export async function createPendingReservation(
       rentalDays: quote.rentalDays,
       dailyRateUsdCents: quote.dailyRateUsdCents,
       totalUsdCents: quote.totalUsdCents,
-      status: 'pending',
+      status: 'pending_verification',
       notes: JSON.stringify({
         source: 'public_booking',
         holdStrategy: selectedBike ? 'assigned_bike' : 'capacity_hold',

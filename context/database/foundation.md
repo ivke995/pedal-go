@@ -19,8 +19,7 @@ PedalGo is configured for Turso/libSQL with Drizzle ORM.
 Current tables:
 - `bike_types` — rentable product categories with slug, description, active/sort flags, features JSON, and `daily_rate_usd_cents`.
 - `bikes` — physical inventory units linked to bike types with unique codes and statuses.
-- `reservations` — customer bookings linked to a bike type and optionally a specific bike, with pickup/return timestamps, rental days, USD totals, and status.
-- `payments` — payment records linked to reservations with USD amount, provider identifiers, status, and payment/refund timestamps.
+- `reservations` — customer bookings linked to a bike type and optionally a specific bike, with pickup/return timestamps, rental days, USD totals, optional `payment_method` (`venmo`/`zelle`), and reservation status.
 - `availability_blocks` — maintenance, reserved-demand, or inactive date ranges scoped to a bike type and/or bike.
 - `admin_users` — admin bootstrap/auth records with unique email, password hash, status, and last-login timestamp.
 
@@ -31,7 +30,8 @@ Schema constraints include foreign keys, indexes for availability/reservation lo
 - Rental days use the MVP rule that every started 24-hour period counts as one full day; invalid or empty ranges return zero days.
 - Price quotes multiply rental days by the supplied daily rate in cents and return USD-cent field names/formatting. Database-backed money fields use USD-cent column/property names.
 - Availability lookup requires an active bike type and available physical bikes.
-- Availability excludes bike-specific pending or confirmed reservation conflicts, unassigned pending/confirmed reservations as capacity consumption, and reserved/maintenance/inactive availability blocks.
+- Availability excludes bike-specific `pending_verification` or confirmed reservation conflicts, unassigned pending-verification/confirmed reservations as capacity consumption, and reserved/maintenance/inactive availability blocks.
+- `pending_verification` is the canonical unpaid manual-review state; confirmed/cancelled/completed semantics remain reservation-level and are not backed by payment rows.
 - Type-wide overlapping availability blocks with no `bike_id` make all bikes for the requested type unavailable during the block window.
 
 ## Environment contract
@@ -47,7 +47,7 @@ Database commands and scripts load `.env.local` and `.env` automatically without
 ## MVP seed data
 
 `pnpm db:seed` creates or updates:
-- One active `PedalGo City Bike` bike type with slug `city-bike` and `daily_rate_usd_cents = 2500`.
+- One active `PedalGo City Bike` bike type with slug `city-bike` and `daily_rate_usd_cents = 4800`.
 - Two available physical bikes: `CITY-001` and `CITY-002`.
 - One active bootstrap admin user with a PBKDF2-SHA256 password hash.
 

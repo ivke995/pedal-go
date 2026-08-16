@@ -1,16 +1,10 @@
 // Shared domain types for PedalGo. Designed so the app can later support
 // multiple bicycle types and a real backend without reshaping the UI.
 
-export type PaymentStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'cancelled'
-  | 'completed'
-  | 'failed'
-  | 'refunded'
+export type PaymentMethod = 'venmo' | 'zelle'
 
 export type ReservationStatus =
-  | 'pending'
+  | 'pending_verification'
   | 'confirmed'
   | 'cancelled'
   | 'completed'

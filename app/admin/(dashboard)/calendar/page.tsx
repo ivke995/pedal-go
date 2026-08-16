@@ -37,7 +37,7 @@ function shortDate(value: Date): string {
 }
 
 function EventBadge({ event }: { event: AdminCalendarEvent }) {
-  const variant = event.type === "availability_block" ? "secondary" : event.status === "pending" ? "outline" : "default";
+  const variant = event.type === "availability_block" ? "secondary" : event.status === "pending_verification" ? "outline" : "default";
 
   return <Badge variant={variant}>{event.type === "availability_block" ? statusLabel(event.status) : statusLabel(event.status)}</Badge>;
 }

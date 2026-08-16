@@ -13,13 +13,13 @@ The homepage booking form checks the featured MVP rental option against database
 
 - Featured bike type id: `bike-type-mvp-city-bike` from `scripts/seed.ts`.
 - Invalid or missing pickup/return input returns field errors; return must be after pickup.
-- Available ranges return rental days, available unit count, daily USD rate, and total USD price.
+- Available ranges return rental days, available unit count, the centralized `$48/day` USD rate, and total USD price.
 - Unavailable ranges return a no-capacity message and do not expose a booking-review link.
 - This step has no reservation, checkout, payment, or email side effects; pending reservation creation happens later on `/booking` after customer details are submitted.
 
 ## Capacity rules
 
-- Availability excludes overlapping `pending` and `confirmed` reservations so newly created pending payment reservations hold capacity before Stripe Checkout completes.
+- Availability excludes overlapping `pending_verification` and `confirmed` reservations so manual-review reservations hold capacity before owner verification.
 
 ## Tests
 

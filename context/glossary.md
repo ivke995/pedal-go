@@ -6,18 +6,17 @@
 - **Reservation** — A customer rental booking with pickup/return dates, price, and status.
 - **Availability block** — A date range that affects rental availability, such as maintenance, reserved demand, or inactive shop days.
 - **Availability quote** — Public booking response for a requested pickup/return range that reports whether the featured bike type is available and, when available, includes rental days and total USD price.
-- **Pending payment reservation** — A database reservation with status `pending`, customer contact details, rental period, USD total, and assigned-bike hold metadata created before Stripe Checkout payment completes.
-- **Stripe Checkout Session** — Hosted Stripe payment session created for a pending reservation; stores reservation/payment metadata and redirects back to PedalGo success or cancel URLs without confirming the reservation client-side.
-- **Payment record** — Database `payments` row linked to a reservation, created as `pending` with provider `stripe`, amount in USD cents, and Stripe Checkout Session id when checkout starts; Stripe webhooks transition it to `confirmed` or `failed`.
-- **Stripe webhook** — Signed Stripe server-to-server event received at `app/api/stripe/webhook`; successful paid checkout events are the only current path that confirms public booking reservations.
+- **Pending-verification reservation** — A database reservation with status `pending_verification`, customer/rental details, USD total, assigned-bike hold metadata, and no implication that external payment was received.
+- **Manual payment method** — The typed reservation-level choice `venmo` or `zelle`; the selected method is persisted without provider API, webhook, or payment-record persistence.
+- **Manual payment verification** — An owner-controlled confirmation step planned for the admin workflow; reservation submission itself never confirms payment.
 - **Resend confirmation email** — Customer email sent after webhook-confirmed payment; includes reservation number, pickup/return times, total paid, pickup location, contact information, and pickup instructions.
 - **Featured rental option** — The single public MVP bike type shown in the customer flow, seeded as `bike-type-mvp-city-bike` / `PedalGo City Bike`.
 - **Bootstrap admin** — Initial active admin user created by `pnpm db:seed`; credentials are supplied through seed environment variables rather than committed to the repository.
 - **Admin session** — Signed HTTP-only cookie named `pedalgo_admin_session` that grants active administrators access to `/admin` routes for the current MVP session window.
 - **Admin dashboard shell** — Protected `/admin` route group with shared admin header, logout, navigation, section routes, and database-backed operations summary metrics.
-- **Admin reservation list** — Protected `/admin/reservations` view backed by `lib/admin-dashboard/reservations.ts`; supports reservation/customer search, reservation status filtering, payment status visibility, and access to manual reservation creation.
-- **Manual reservation** — Admin-created reservation inserted from `/admin/reservations` without charging a card; backed by `lib/admin-dashboard/manual-reservations.ts`, availability re-checks, current USD price calculation, and optional `pending`/`confirmed` status selection.
-- **Admin reservation cancellation** — Protected `/admin/reservations` action backed by `lib/admin-dashboard/cancellations.ts`; allows admins to move `pending` or `confirmed` reservations to `cancelled`, records cancellation metadata in reservation notes, and leaves payment/refund state visible but unchanged.
+- **Admin reservation list** — Protected `/admin/reservations` view backed by `lib/admin-dashboard/reservations.ts`; supports reservation/customer search, reservation status filtering, Venmo/Zelle method filtering, and access to manual reservation creation.
+- **Manual reservation** — Admin-created reservation inserted from `/admin/reservations` without charging a card; backed by `lib/admin-dashboard/manual-reservations.ts`, availability re-checks, the centralized $48/day rate, and optional `pending_verification`/`confirmed` status selection.
+- **Admin reservation cancellation** — Protected `/admin/reservations` action backed by `lib/admin-dashboard/cancellations.ts`; allows admins to move `pending_verification` or `confirmed` reservations to `cancelled` and records cancellation metadata in reservation notes.
 - **Admin pricing management** — Protected `/admin/pricing` workflow backed by `lib/admin-dashboard/pricing.ts`; updates active bike-type daily USD rates for new quotes/bookings without recalculating existing reservation totals.
 - **Admin availability block management** — Protected `/admin/availability` workflow backed by `lib/admin-dashboard/availability-blocks.ts`; lets admins create, update, delete, and review bike-type or bike-specific reserved/maintenance/inactive blocks that feed shared booking availability checks.
 - **Admin availability calendar** — Protected `/admin/calendar` view backed by `lib/admin-dashboard/calendar.ts`; shows a navigable month calendar/list hybrid of reservations and availability blocks with open/partial/unavailable day indicators.
@@ -26,5 +25,5 @@
 - **Turso** — Hosted libSQL database provider used for PedalGo database environments.
 - **libSQL** — SQLite-compatible database engine/client used by PedalGo through `@libsql/client`.
 - **Drizzle ORM** — TypeScript ORM and migration tooling used for PedalGo database schema and queries.
-- **Deployment environment contract** — The canonical `README.md` section listing required/optional Turso, Stripe, Resend, admin, public URL, and PedalGo contact-copy variables plus local/deployment setup checklist.
+- **Deployment environment contract** — The canonical `README.md` section listing required/optional Turso, legacy-provider, Resend, admin, public URL, and PedalGo contact-copy variables plus local/deployment setup checklist.
 - **SCE** — Shared Context Engineering: durable AI-first project memory stored under `context/`.

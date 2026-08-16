@@ -21,12 +21,12 @@
 - Keep client-safe USD display formatting helpers in `lib/pricing.ts`; database-backed booking paths use server-side pricing from `lib/domain/pricing.ts`.
 - Keep server-side database-backed rental pricing and availability logic in `lib/domain/`; do not import those helpers into client components when they pull in database access.
 - Keep public booking orchestration in `lib/public-booking/`; client components should call server actions rather than importing database-backed domain helpers directly.
-- Keep Stripe Checkout creation server-side in `lib/public-booking/checkout.ts` behind `app/actions/create-checkout-session.ts`; never import Stripe SDK or database clients into client components.
-- Keep Stripe webhook handling in `app/api/stripe/webhook/route.ts` and `lib/public-booking/webhooks.ts`; verify signatures against the raw request body and never confirm reservations from client-side success/cancel navigation.
-- Keep booking confirmation email creation/sending in `lib/public-booking/confirmation-email.ts` and trigger it only from webhook-confirmed reservation transitions, not from client-side success/cancel pages.
+- Keep the manual-payment submission boundary server-side in `lib/public-booking/`; customer-facing Venmo/Zelle details must be introduced by the later notification/submission task and must not expose owner-only configuration.
+- `pending_verification` is an unpaid/manual-review state. No client redirect, provider webhook, or customer claim may transition it to `confirmed`.
+- Legacy Stripe checkout/webhook modules currently fail closed while the booking flow is migrated; provider artifact removal belongs to the later cleanup task.
 - Keep admin authentication server-only in `lib/admin-auth/`; admin route groups under `app/admin/(dashboard)/` should use the protected layout rather than client-side access checks.
 - Keep admin dashboard database reads and mutations server-side in `lib/admin-dashboard/`; protected admin pages/actions should import those helpers rather than importing the database client into client components.
-- Keep only client-safe static display fixtures in `lib/mock-data.ts`; public booking availability, reservation, payment, and status behavior must use database-backed server paths.
+- Keep only client-safe static display fixtures in `lib/mock-data.ts`; public booking availability, reservation, and status behavior must use database-backed server paths.
 - Keep database connection code under `lib/db/`; do not import the database client into client components.
 - Keep Drizzle tables, relations, status constants, indexes, and database check constraints in `lib/db/schema.ts`.
 - Use USD-cent names for database-backed money columns and server-side pricing fields (`*_usd_cents` / `*UsdCents`).

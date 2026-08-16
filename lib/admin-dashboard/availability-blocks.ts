@@ -209,7 +209,7 @@ async function hasReservationConflict(
     .where(
       and(
         eq(reservations.bikeTypeId, input.bikeTypeId),
-        or(eq(reservations.status, "pending"), eq(reservations.status, "confirmed")),
+        or(eq(reservations.status, "pending_verification"), eq(reservations.status, "confirmed")),
         lt(reservations.pickupAt, input.endsAt),
         gt(reservations.returnAt, input.startsAt),
         input.bikeId ? or(eq(reservations.bikeId, input.bikeId), isNull(reservations.bikeId)) : undefined,

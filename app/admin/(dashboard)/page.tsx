@@ -10,13 +10,16 @@ export default async function AdminDashboardPage() {
   const summary = await getAdminDashboardSummary();
   const metrics = [
     { label: "Total reservations", value: summary.totalReservations.toLocaleString(), hint: "All reservation records" },
-    { label: "Pending reservations", value: summary.pendingReservations.toLocaleString(), hint: "Awaiting payment or admin review" },
-    { label: "Confirmed reservations", value: summary.confirmedReservations.toLocaleString(), hint: "Booked rentals" },
-    { label: "Pending payments", value: summary.pendingPayments.toLocaleString(), hint: "Open Stripe/admin payment records" },
     {
-      label: "Confirmed revenue",
-      value: formatCurrency(summary.confirmedRevenueUsdCents / 100),
-      hint: "Confirmed payment total",
+      label: "Pending verification",
+      value: summary.pendingVerificationReservations.toLocaleString(),
+      hint: "Awaiting manual payment review",
+    },
+    { label: "Confirmed reservations", value: summary.confirmedReservations.toLocaleString(), hint: "Booked rentals" },
+    {
+      label: "Confirmed reservation value",
+      value: formatCurrency(summary.confirmedReservationValueUsdCents / 100),
+      hint: "Confirmed rental totals",
     },
     { label: "Active blocks", value: summary.activeAvailabilityBlocks.toLocaleString(), hint: "Current or future unavailable periods" },
     { label: "Active bike types", value: summary.activeBikeTypes.toLocaleString(), hint: "Rentable categories" },
@@ -29,7 +32,7 @@ export default async function AdminDashboardPage() {
         <CardHeader>
           <CardTitle>Operations summary</CardTitle>
           <CardDescription>
-            Live database-backed boundaries for reservations, payments, inventory, and availability.
+             Live database-backed boundaries for reservations, inventory, and availability.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

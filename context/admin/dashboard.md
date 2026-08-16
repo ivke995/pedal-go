@@ -19,9 +19,8 @@ Reports is currently a protected MVP section boundary without a reporting workfl
 `lib/admin-dashboard/summary.ts` is a server-only query boundary used by `/admin`.
 
 Current summary metrics come from Drizzle queries over existing rental tables:
-- total, pending, and confirmed reservations
-- pending payments
-- confirmed payment revenue in USD cents
+- total, pending-verification, and confirmed reservations
+- confirmed reservation value in USD cents
 - current/future availability blocks
 - active bike types
 - physical bike inventory count
@@ -35,12 +34,11 @@ Client components must not import this helper because it imports the database cl
 The reservations page reads GET query parameters from `searchParams` and renders a no-client-state filter form:
 - `search` matches reservation reference, customer name, customer email, or customer phone.
 - `status` filters by `RESERVATION_STATUSES` from `lib/db/schema.ts`; invalid values fall back to all statuses.
-- `paymentStatus` filters by `PAYMENT_STATUSES` or `none`; invalid values fall back to all payments.
+- `paymentMethod` filters by `PAYMENT_METHODS` or `none`; invalid values fall back to all methods.
 
 The table displays reservation reference, customer details, pickup/return window, rental duration, reservation status,
-latest joined payment status/provider, bike type, assigned bike code when present, total USD amount, and cancellation
-controls for cancellable rows. The query limits results to the newest 100 matching rows and collapses duplicate joined
-payment rows by reservation id.
+persisted manual payment method, bike type, assigned bike code when present, total USD amount, and cancellation controls
+for cancellable rows. The query limits results to the newest 100 matching rows without payment joins.
 
 ## Manual reservation creation
 
@@ -48,12 +46,12 @@ payment rows by reservation id.
 `app/admin/actions.ts` exposes it through `createManualReservationAction` after requiring an authenticated admin.
 
 The `/admin/reservations` form captures active bike type, customer name/email/phone, pickup/return date-time, optional
-internal note, and a status of `confirmed` or `pending` (default `confirmed`). Creation reuses `getBikeAvailability()`
+internal note, and a status of `confirmed` or `pending_verification` (default `confirmed`). Creation reuses `getBikeAvailability()`
 and `quoteRentalPrice()` immediately before insert, assigns the first available physical bike when possible, writes
 `notes.source = "admin_manual"`, and redirects back to the reservation list with a success or error query message.
 
-Manual reservation creation does not create a `payments` row, charge customer cards, or create customer accounts. Because
-availability treats `pending` and `confirmed` reservations as blocking, successful manual reservations appear in the list
+Manual reservation creation does not create a payment row, charge customer cards, or create customer accounts. Because
+availability treats `pending_verification` and `confirmed` reservations as blocking, successful manual reservations appear in the list
 and block later customer/admin bookings for the same rental window.
 
 ## Reservation cancellation
@@ -61,13 +59,13 @@ and block later customer/admin bookings for the same rental window.
 `lib/admin-dashboard/cancellations.ts` is the server-side helper for admin cancellations and `app/admin/actions.ts`
 exposes it through `cancelReservationAction` after requiring an authenticated admin.
 
-Admins can cancel reservations currently in `pending` or `confirmed` status from `/admin/reservations`. The action updates
+Admins can cancel reservations currently in `pending_verification` or `confirmed` status from `/admin/reservations`. The action updates
 the reservation status to `cancelled`, writes `notes.cancellation` metadata with `cancelledBy = "admin"`, `cancelledAt`,
 and optional reason, and redirects back to the reservation list with a success/error query message.
 
 Terminal statuses (`cancelled`, `completed`, `failed`, `refunded`) are not cancellable. Cancellation does not create or
-update payment rows and does not automate Stripe refunds; existing payment status/provider details remain visible in the
-reservation list. Because availability only treats `pending` and `confirmed` reservations as blocking, cancelled
+update provider payment records and does not automate external refunds. Because availability only treats `pending_verification` and
+`confirmed` reservations as blocking, cancelled
 reservations no longer reduce bike availability.
 
 ## Pricing management
@@ -80,9 +78,9 @@ type. Updates validate prices as positive USD amounts from `0.01` to `9,999.99` 
 as `bike_types.daily_rate_usd_cents`, and write `bike_types.updated_at` for audit-friendly change visibility.
 
 Pricing updates only mutate the active bike-type row. Existing reservation rows keep their stored `daily_rate_usd_cents`
-and `total_usd_cents`, so historical/paid totals are not recalculated. New homepage availability quotes, public pending
-reservations, and admin manual reservations use the current bike-type daily rate through existing availability/pricing
-helpers.
+and `total_usd_cents`, so historical totals are not recalculated. Public availability quotes, public reservations, and
+admin manual reservations currently use the centralized $48/day rate abstraction; the bike-type rate field remains the
+database extension point for future pricing tiers.
 
 ## Availability block management
 
@@ -95,10 +93,10 @@ blocks scoped to an active bike type or a specific physical bike. Blocks store a
 `reserved`/`maintenance`/`inactive`, start/end timestamps, and an optional internal note.
 
 Creation and updates validate date order, status, selected bike/bike-type consistency, and conflicts with overlapping
-`pending`/`confirmed` reservations or overlapping availability blocks for the same resource. Successful block mutations
+`pending_verification`/`confirmed` reservations or overlapping availability blocks for the same resource. Successful block mutations
 revalidate admin availability/reservations plus public booking entry paths. Because `lib/domain/availability.ts` treats
 reserved, maintenance, and inactive blocks as blocking, saved blocks prevent new public bookings and admin manual
-reservations for matching windows. Deleting a block removes only that block; reservations and payments are not mutated.
+reservations for matching windows. Deleting a block removes only that block; reservations are not mutated.
 
 ## Availability calendar
 
@@ -107,7 +105,7 @@ reservations for matching windows. Deleting a block removes only that block; res
 The calendar page reads an optional `month=YYYY-MM` query parameter, falls back to the current UTC month, and provides
 previous/current/next month links. It queries records overlapping the month window and renders both a calendar grid and a
 schedule table:
-- reservations in `pending`, `confirmed`, or `completed` status, with links back to `/admin/reservations?search=<ref>`;
+- reservations in `pending_verification`, `confirmed`, or `completed` status, with links back to `/admin/reservations?search=<ref>`;
 - availability blocks in `reserved`, `maintenance`, or `inactive` status, with links back to `/admin/availability`.
 
 Each day receives an MVP availability indicator: `open` when no blocking event overlaps the day, `partial` when one

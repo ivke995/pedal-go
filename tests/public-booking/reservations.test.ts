@@ -20,7 +20,7 @@ const bikeType = {
   name: 'PedalGo City Bike',
   slug: 'city-bike',
   description: 'Comfortable all-purpose city bike.',
-  dailyRateUsdCents: 2500,
+  dailyRateUsdCents: 4800,
   imagePath: null,
   featuresJson: [],
   isActive: true,
@@ -147,13 +147,13 @@ describe('public booking pending reservation', () => {
     assert.equal(result.reservation.customerEmail, 'jane@example.com')
     assert.equal(result.reservation.bikeId, 'bike-1')
     assert.equal(result.reservation.rentalDays, 3)
-    assert.equal(result.reservation.dailyRateUsdCents, 2500)
-    assert.equal(result.reservation.totalUsdCents, 7500)
+    assert.equal(result.reservation.dailyRateUsdCents, 4800)
+    assert.equal(result.reservation.totalUsdCents, 14400)
     assert.equal(result.reservation.holdExpiresAt, '2026-07-14T09:30:00.000Z')
     assert.equal(database.insertedRows.length, 1)
 
     const inserted = database.insertedRows[0]
-    assert.equal(inserted.status, 'pending')
+    assert.equal(inserted.status, 'pending_verification')
     assert.equal(inserted.bikeId, 'bike-1')
     assert.deepEqual(JSON.parse(String(inserted.notes)), {
       source: 'public_booking',
