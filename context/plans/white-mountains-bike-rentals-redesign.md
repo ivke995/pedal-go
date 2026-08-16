@@ -136,12 +136,52 @@ Replace the Stripe/payment-provider flow completely with a manual external-payme
    - Evidence: `pnpm test` passed (41 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed; `git diff --check` passed; public-component and public-booking search found no PedalGo, Sarajevo, placeholder contact, or legacy online-payment copy. Static review confirms semantic section headings, responsive Tailwind layouts, focus-visible controls, real `/booking` links, and current image assets. Browser-width/runtime smoke checks remain part of T07 final validation.
    - Notes: The landing page now uses the White Mountains brand treatment, navy/forest/olive/off-white/muted-blue/gold palette, condensed display font, current $48/day rate, free hotel delivery/pickup messaging, supplied phone/Instagram/service-area details, and a manual Venmo/Zelle-compatible booking entry point without changing booking behavior. Root context and the new `context/public-site/landing-page.md` are synchronized with the current public UI.
 
-- [ ] T07: `Validate release and synchronize shared context` (status:todo)
+- [x] T07: `Validate release and synchronize shared context` (status:done)
   - Task ID: T07
   - Goal: Perform final full-project validation and leave durable SCE context aligned with the implemented current state.
   - Boundaries (in/out of scope): In — run the full test suite, lint, production build, database migration/check validation, and responsive/manual smoke checks; remove temporary scaffolding; update `context/overview.md`, `context/architecture.md`, `context/patterns.md`, `context/glossary.md`, `context/context-map.md`, `context/database/foundation.md`, and the relevant public-booking context file to remove Stripe assumptions and document manual payments, env variables, statuses, email ownership, and the $48 rate. Out — new feature work discovered during validation; record blockers instead of silently expanding scope.
-  - Done when: All success criteria have evidence, validation failures are fixed or explicitly reported, no stale Stripe/payment-provider context remains, and the plan contains command results plus any known limitations.
-  - Verification notes (commands or checks): `pnpm test`; `pnpm lint`; `pnpm build`; `TURSO_DATABASE_URL=file:./local.db pnpm db:check`; `TURSO_DATABASE_URL=file:./local.db pnpm db:generate` only if schema changes require generation; apply/migrate in a safe local database when appropriate; document responsive/browser smoke results and context-sync review in this plan.
+   - Done when: All success criteria have evidence, validation failures are fixed or explicitly reported, no stale Stripe/payment-provider context remains, and the plan contains command results plus any known limitations.
+   - Completed: 2026-08-16
+   - Files changed: `context/overview.md`, `context/public-booking/payments.md`, and this plan's validation evidence
+   - Evidence: `pnpm test` passed 41/41 tests across 12 suites; `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed with Next.js 16.2.6/Turbopack and generated `/`, `/booking`, `/admin`, `/admin/login`, `/admin/availability`, `/admin/calendar`, `/admin/pricing`, `/admin/reports`, `/admin/reservations`, and `/_not-found`; `TURSO_DATABASE_URL=file:/tmp/opencode/release-validation-t07.sqlite pnpm db:migrate` applied the migrations, `ADMIN_BOOTSTRAP_PASSWORD='t07-validation-password' ... pnpm db:seed` created the MVP bike type, `CITY-001`, `CITY-002`, and an active validation admin, and `pnpm db:check` returned `Everything's fine`. Local HTTP smoke checks against `pnpm start` returned 200 for `/`, `/booking`, and `/admin/login` with Next.js output. Source searches found no executable Stripe, checkout, webhook, or provider-payment references; context sync verified the root, database, public-booking, admin, and public-site context files, and added the missing `RESEND_API_KEY` requirement to current-state summaries. `git diff --check` passed and no temporary validation database was left in the repository.
+   - Notes: Responsive/manual validation used static accessibility/layout review plus local HTTP route smoke; no Playwright, Puppeteer, or browser automation dependency is installed for device-width interaction testing. The ignored local `.env` still contains legacy provider-looking local configuration from earlier setup; it is not tracked or used by current code, but should be removed/rotated before any release environment is considered clean. Historical Stripe wording remains only in the disposable/historical `context/plans/mvp-release-validation.md` record and in negative current-state statements documenting that the provider boundary is absent.
+   - Verification notes (commands or checks): `pnpm test`; `pnpm lint`; `pnpm build`; `TURSO_DATABASE_URL=file:./local.db pnpm db:check`; `TURSO_DATABASE_URL=file:./local.db pnpm db:generate` only if schema changes require generation; apply/migrate in a safe local database when appropriate; document responsive/browser smoke results and context-sync review in this plan.
+
+## Validation Report
+
+### Commands run
+
+- `pnpm test` -> exit 0; 41/41 tests passed across 12 suites.
+- `pnpm lint` -> exit 0.
+- `pnpm exec tsc --noEmit` -> exit 0.
+- `pnpm build` -> exit 0; Next.js 16.2.6/Turbopack compiled and generated the public, booking, admin, and not-found routes.
+- `TURSO_DATABASE_URL=file:/tmp/opencode/release-validation-t07.sqlite pnpm db:migrate` -> exit 0; migrations applied to a disposable database.
+- `TURSO_DATABASE_URL=file:/tmp/opencode/release-validation-t07.sqlite ADMIN_BOOTSTRAP_PASSWORD='t07-validation-password' ... pnpm db:seed` -> exit 0; MVP bike type, two bikes, and an active validation admin seeded.
+- `TURSO_DATABASE_URL=file:/tmp/opencode/release-validation-t07.sqlite pnpm db:check` -> exit 0; `Everything's fine`.
+- Local `pnpm start` smoke with `curl` -> exit 0; `/`, `/booking`, and `/admin/login` each returned HTTP 200 with Next.js output.
+- Source searches across `app/`, `components/`, `lib/`, `tests/`, and `scripts/` -> no executable Stripe, checkout, webhook, or provider-payment references.
+- `git diff --check` -> exit 0; disposable database and other temporary validation artifacts removed.
+
+### Success-criteria verification
+
+- [x] White Mountains homepage composition and palette are represented by maintainable route/components; static accessibility/responsive review and `/` HTTP smoke passed.
+- [x] Homepage messaging, booking links, `$48/day`, service area, delivery/pickup, and navigation are documented in current context and served successfully; `/booking` HTTP smoke passed.
+- [x] Availability re-check, Venmo/Zelle selection, `$48/day` calculation, and `pending_verification` reservation behavior passed public-booking/domain tests.
+- [x] Reservation reference, dates, duration, exact amount, selected instructions, and pending-manual-confirmation wording passed notification and reservation tests.
+- [x] Customer/owner notification boundaries, server-only configuration, and failure-safe pending behavior passed notification/reservation tests and context review.
+- [x] No executable provider checkout, webhook, payment table/provider record, automated confirmation, or customer-paid claim remains in current source; historical plan records retain historical evidence only.
+- [x] Admin verification behavior passed the dedicated tests: only an authenticated owner/admin transition can move `pending_verification` to `confirmed`; public/admin route smoke reached the login boundary.
+- [x] Full tests, lint, TypeScript, production build, migration/seed/check, source search, and context synchronization completed successfully.
+
+### Failed checks and follow-ups
+
+- No validation command failed. The first route-content assertion attempted to use unavailable `python`; it was rerun with Node and passed for all three routes.
+- No browser automation or real external Venmo/Zelle/Resend transaction was run because no browser harness is installed and production credentials/providers are not part of local validation.
+
+### Residual risks
+
+- Before release, remove/rotate the ignored local `.env` legacy provider-looking values and configure only the current documented Turso, manual-payment, Resend, and admin secrets. Do not commit those values.
+- Perform a real deployment browser-width smoke and verified Resend sender/payment-instruction check after production environment configuration.
 
 ## Assumptions
 
