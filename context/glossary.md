@@ -1,6 +1,7 @@
 # Glossary
 
-- **PedalGo** — The bicycle rental app/brand.
+- **PedalGo** — The internal/package/admin identifier retained in the current MVP codebase; the public customer-facing brand is White Mountains Bike Rentals.
+- **White Mountains Bike Rentals** — The current public brand for bicycle rentals serving Lincoln, Woodstock, and the surrounding White Mountains.
 - **Bike type** — A rentable category of bicycle, represented in the database by `bike_types` and in current UI types by `BikeType`.
 - **Physical bike** — A specific inventory unit, represented in the database by `bikes` and in current UI types by `PhysicalBike`.
 - **Reservation** — A customer rental booking with pickup/return dates, price, and status.
@@ -11,7 +12,9 @@
 - **Manual payment verification** — An authenticated admin-only action that independently confirms an externally received Venmo/Zelle payment by moving a reservation from `pending_verification` to `confirmed`; it records verifier identity, timestamp, and optional note, while reservation submission and notification delivery never confirm payment.
 - **Reservation-received notification** — Immediate customer and owner Resend messages sent after a reservation is saved; they include reservation/rental details, exact amount due, selected manual method, method-specific instructions, and explicit pending-manual-confirmation wording.
 - **Manual payment instructions** — UI-safe data for only the selected Venmo or Zelle method: recipient and exact-amount instructions tied to the reservation reference. Owner recipient and sender configuration are never returned.
-- **Featured rental option** — The single public MVP bike type shown in the customer flow, seeded as `bike-type-mvp-city-bike` / `PedalGo City Bike`.
+- **Featured rental option** — The single public MVP bike type shown in the customer flow, seeded as `bike-type-mvp-city-bike` and displayed publicly as White Mountains City Bike.
+- **White Mountains City Bike** — The public display label for the current featured city-bike inventory option; it uses the existing city-bike asset and current inventory data.
+- **Free hotel delivery and pickup** — A current public offer communicated by the landing page for the White Mountains service area; it is marketing copy, not a separate booking or pricing rule.
 - **Bootstrap admin** — Initial active admin user created by `pnpm db:seed`; credentials are supplied through seed environment variables rather than committed to the repository.
 - **Admin session** — Signed HTTP-only cookie named `pedalgo_admin_session` that grants active administrators access to `/admin` routes for the current MVP session window.
 - **Admin dashboard shell** — Protected `/admin` route group with shared admin header, logout, navigation, section routes, and database-backed operations summary metrics.

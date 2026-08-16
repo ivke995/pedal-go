@@ -37,11 +37,11 @@ export function AvailabilityResult({ result }: AvailabilityResultProps) {
 
   return (
     <div
-      className="rounded-2xl border border-primary/20 bg-primary/5 p-5"
+         className="rounded-2xl border border-[var(--wm-forest)]/20 bg-[var(--wm-forest)]/5 p-5"
       role="status"
       aria-live="polite"
     >
-      <div className="flex items-center gap-2 text-primary">
+         <div className="flex items-center gap-2 text-[var(--wm-forest)]">
         <CheckCircle2 className="size-5" aria-hidden="true" />
         <p className="font-heading text-base font-semibold">Bike available</p>
       </div>
@@ -59,7 +59,7 @@ export function AvailabilityResult({ result }: AvailabilityResultProps) {
         render={<Link href={bookingHref} />}
         nativeButton={false}
         size="lg"
-        className="mt-4 w-full"
+         className="mt-4 w-full bg-[var(--wm-forest)] hover:bg-[var(--wm-navy)]"
       >
         Continue to Booking
         <ArrowRight data-icon="inline-end" />

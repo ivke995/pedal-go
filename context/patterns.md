@@ -13,6 +13,8 @@
 - Tailwind CSS utility classes are used throughout components.
 - UI primitives live in `components/ui/` and should be reused before creating one-off controls.
 - Public site sections live in `components/public/`.
+- Keep public landing sections small and route-composed from `app/page.tsx`; use real `/booking` links for booking CTAs and retain the homepage availability form as the database-backed entry check.
+- Public brand styling uses the scoped `--wm-*` palette variables and `font-display` for condensed, uppercase display headings; do not change protected admin behavior or invent business contact details when extending the page.
 - Booking-specific components live in `components/booking/`.
 
 ## Domain logic

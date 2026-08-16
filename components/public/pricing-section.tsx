@@ -4,30 +4,31 @@ import { Button } from '@/components/ui/button'
 import { formatCurrency, DAILY_RATE } from '@/lib/pricing'
 
 const INCLUDED = [
-  'Transparent pricing',
+  'One clear $48 daily rate',
   'No hidden booking fees',
   'Lock included with every rental',
   'Every started 24-hour period counts as one rental day',
+  'Free hotel delivery and pickup',
 ]
 
 export function PricingSection() {
   return (
-    <section id="pricing" className="scroll-mt-20 py-16 sm:py-24">
+    <section id="pricing" className="scroll-mt-20 bg-[var(--wm-offwhite)] py-24 sm:py-32">
       <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-3 text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--wm-forest)]">
             Pricing
           </p>
-          <h2 className="font-heading text-3xl font-bold tracking-tight text-foreground text-balance sm:text-4xl">
-            Simple, honest pricing
+          <h2 className="font-display text-5xl font-bold uppercase leading-none tracking-tight text-[var(--wm-navy)] text-balance sm:text-6xl">
+            Keep it simple
           </h2>
           <p className="max-w-xl text-muted-foreground text-pretty">
-            One clear daily rate. What you see is what you pay.
+            One clear daily rate, with the details you need before you ride.
           </p>
         </div>
 
         <div className="mt-10 overflow-hidden rounded-3xl border border-border bg-card shadow-sm md:grid md:grid-cols-2">
-          <div className="flex flex-col items-center justify-center gap-2 bg-primary p-10 text-center text-primary-foreground">
+          <div className="flex flex-col items-center justify-center gap-2 bg-[var(--wm-forest)] p-10 text-center text-white">
             <p className="text-sm font-medium uppercase tracking-widest opacity-90">
               Daily rate
             </p>
@@ -51,10 +52,10 @@ export function PricingSection() {
               ))}
             </ul>
             <Button
-              render={<Link href="/#home" />}
+              render={<Link href="/booking" />}
               nativeButton={false}
               size="lg"
-              className="w-full"
+              className="w-full bg-[var(--wm-navy)] hover:bg-[var(--wm-forest)]"
             >
               Book a Bike
             </Button>

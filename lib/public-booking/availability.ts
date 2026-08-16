@@ -3,6 +3,7 @@ import { CURRENT_DAILY_RATE_USD_CENTS, quoteRentalPrice } from '@/lib/domain/pri
 import type { BookingDraft } from '@/lib/types'
 
 export const FEATURED_BIKE_TYPE_ID = 'bike-type-mvp-city-bike'
+export const FEATURED_BIKE_DISPLAY_NAME = 'White Mountains City Bike'
 
 export type AvailabilityQuoteInput = {
   pickupAt: string
@@ -106,7 +107,7 @@ export async function getFeaturedBikeAvailabilityQuote(
   if (!availability.bikeType) {
     return {
       status: 'unavailable',
-      message: 'The featured PedalGo bike is not available right now.',
+       message: 'The featured city bike is not available right now.',
       bikeTypeId: FEATURED_BIKE_TYPE_ID,
       pickupAt: input.pickupAt,
       returnAt: input.returnAt,
@@ -117,9 +118,9 @@ export async function getFeaturedBikeAvailabilityQuote(
   if (!availability.isAvailable) {
     return {
       status: 'unavailable',
-      message: 'No PedalGo City Bikes are available for the selected dates.',
-      bikeTypeId: availability.bikeType.id,
-      bikeName: availability.bikeType.name,
+       message: 'No city bikes are available for the selected dates.',
+       bikeTypeId: availability.bikeType.id,
+       bikeName: FEATURED_BIKE_DISPLAY_NAME,
       pickupAt: input.pickupAt,
       returnAt: input.returnAt,
       days: availability.rentalDays,
@@ -144,7 +145,7 @@ export async function getFeaturedBikeAvailabilityQuote(
       total,
     },
     bikeTypeId: availability.bikeType.id,
-    bikeName: availability.bikeType.name,
+     bikeName: FEATURED_BIKE_DISPLAY_NAME,
     availableUnits: availability.availableBikes.length,
     dailyRateUsdCents: quote.dailyRateUsdCents,
     totalUsdCents: quote.totalUsdCents,

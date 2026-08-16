@@ -143,7 +143,7 @@ describe('public booking pending reservation', () => {
     const result = await createPendingReservation(validInput, database as never, testOptions())
 
     assert.equal(result.status, 'unavailable')
-    assert.match(result.message, /No PedalGo City Bikes are available/)
+    assert.match(result.message, /No city bikes are available/)
     assert.equal(database.insertedRows.length, 0)
   })
 

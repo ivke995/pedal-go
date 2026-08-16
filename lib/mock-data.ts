@@ -3,7 +3,7 @@ import { DAILY_RATE } from '@/lib/pricing'
 
 export const cityBike: BikeType = {
   id: 'bt_city',
-  name: 'PedalGo City Bike',
+  name: 'White Mountains City Bike',
   slug: 'city-bike',
   description:
     'A comfortable, easy-riding city bike perfect for exploring town, the riverside, and everything in between.',

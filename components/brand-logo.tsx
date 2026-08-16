@@ -30,24 +30,22 @@ export function BrandLogo({
       <span className="flex flex-col leading-none">
         <span
           className={cn(
-            'font-heading text-lg font-extrabold tracking-tight',
+            'font-display text-lg font-bold uppercase tracking-[0.04em] sm:text-xl',
             variant === 'onDark' ? 'text-sidebar-foreground' : 'text-foreground',
           )}
         >
-          PedalGo
+          White Mountains
         </span>
-        {subtitle ? (
-          <span
-            className={cn(
-              'text-[0.65rem] font-medium uppercase tracking-widest',
-              variant === 'onDark'
-                ? 'text-sidebar-foreground/60'
-                : 'text-muted-foreground',
-            )}
-          >
-            {subtitle}
-          </span>
-        ) : null}
+        <span
+          className={cn(
+            'text-[0.62rem] font-semibold uppercase tracking-[0.2em]',
+            variant === 'onDark'
+              ? 'text-sidebar-foreground/60'
+              : 'text-muted-foreground',
+          )}
+        >
+          {subtitle ?? 'Bike Rentals'}
+        </span>
       </span>
     </span>
   )
@@ -55,7 +53,7 @@ export function BrandLogo({
   if (!href) return content
 
   return (
-    <Link href={href} className="inline-flex" aria-label="PedalGo home">
+    <Link href={href} className="inline-flex" aria-label="White Mountains Bike Rentals home">
       {content}
     </Link>
   )

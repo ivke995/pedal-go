@@ -8,23 +8,23 @@ import {
 const FAQS = [
   {
     q: 'Do I need an account to book?',
-    a: 'No account needed. Just choose your dates, enter your details, and pay online. Your reservation is confirmed instantly.',
+    a: 'No account needed. Choose your dates, enter your details, and select Venmo or Zelle. We will send payment instructions with your reservation details.',
   },
   {
     q: 'When is my reservation confirmed?',
-    a: 'Your reservation is confirmed as soon as your online payment is completed. You will receive a confirmation email with your reservation number.',
+    a: 'Your reservation stays pending manual confirmation after you submit. We confirm it after independently verifying the external payment. You will receive the next steps by email.',
   },
   {
     q: 'Can I cancel my booking?',
-    a: 'Yes. You can cancel free of charge up to 24 hours before your pickup time. Cancellations are handled through the confirmation email or by contacting our team.',
+    a: 'Please call (603) 348-1320 as soon as possible and we will help with your request.',
   },
   {
     q: 'What do I need when picking up the bicycle?',
-    a: 'Please bring your reservation number and a valid photo ID. That is all you need to collect your bike at our pickup location.',
+    a: 'Keep your reservation reference handy. If we are delivering to your hotel, we will coordinate the handoff with you directly.',
   },
   {
     q: 'Is a lock included?',
-    a: 'Yes, every rental includes a sturdy lock at no extra cost, so you can park with peace of mind while you explore.',
+    a: 'Yes, every rental includes a lock at no extra cost, so you can stop and explore with peace of mind.',
   },
   {
     q: 'What happens if I return the bicycle late?',
@@ -44,7 +44,7 @@ export function FaqSection() {
             Frequently asked questions
           </h2>
           <p className="max-w-xl text-muted-foreground text-pretty">
-            Everything you need to know about renting a bike with PedalGo.
+            Everything you need to know before your White Mountains ride.
           </p>
         </div>
 

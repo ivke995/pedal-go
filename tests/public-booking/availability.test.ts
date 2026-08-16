@@ -108,7 +108,7 @@ describe('public booking availability quote', () => {
 
     assert.equal(result.status, 'available')
     assert.equal(result.bikeTypeId, 'bike-type-mvp-city-bike')
-    assert.equal(result.bikeName, 'PedalGo City Bike')
+    assert.equal(result.bikeName, 'White Mountains City Bike')
     assert.equal(result.availableUnits, 1)
     assert.equal(result.draft.days, 3)
     assert.equal(result.draft.dailyRate, 48)
@@ -121,6 +121,6 @@ describe('public booking availability quote', () => {
     const result = await quote({ bikeType, bikeRows: [] })
 
     assert.equal(result.status, 'unavailable')
-    assert.match(result.message, /No PedalGo City Bikes are available/)
+    assert.match(result.message, /No city bikes are available/)
   })
 })
