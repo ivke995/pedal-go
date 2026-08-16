@@ -79,7 +79,7 @@ Replace the Stripe/payment-provider flow completely with a manual external-payme
    - Completed: 2026-08-16
    - Files changed: `lib/db/schema.ts`, `lib/domain/`, `lib/public-booking/`, `lib/admin-dashboard/`, `scripts/seed.ts`, focused tests, and `drizzle/0001_daily_ser_duncan.sql`.
    - Evidence: `pnpm test` passed (37 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed; `TURSO_DATABASE_URL=file:./local.db pnpm db:check` passed; migration applied successfully to local `file:./local.db`.
-   - Notes: Legacy `pending` reservations migrate to `pending_verification`; provider-facing modules remain fail-closed transitional boundaries for T03/T05 cleanup.
+   - Notes: Legacy `pending` reservations migrate to `pending_verification`; provider-facing modules were retained as fail-closed transitional boundaries until the T05 cleanup.
 
 - [x] T02: `Add manual payment instructions and reservation notifications` (status:done)
   - Task ID: T02
@@ -101,7 +101,7 @@ Replace the Stripe/payment-provider flow completely with a manual external-payme
    - Completed: 2026-08-16
    - Files changed: `components/booking/booking-flow.tsx`, `components/booking/customer-details-form.tsx`, `components/booking/payment-method-form.tsx`, `components/booking/reservation-confirmation.tsx`, `components/booking/payment-preview.tsx` (removed), and `lib/pricing.ts`
    - Evidence: `pnpm test` passed (41 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed. Booking flow now submits only after method selection, returns selected-method instructions, and renders a pending manual-confirmation summary.
-   - Notes: The existing `/booking/success` and `/booking/cancel` provider-return routes remain transitional artifacts for T05 cleanup, but the active booking flow no longer links to or imports them.
+   - Notes: The active booking flow no longer linked to provider-return routes; those transitional artifacts were removed by T05.
 
 - [x] T04: `Add owner-controlled manual reservation verification` (status:done)
   - Task ID: T04
@@ -114,12 +114,16 @@ Replace the Stripe/payment-provider flow completely with a manual external-payme
    - Evidence: Focused admin-dashboard tests passed (11 tests); full `pnpm test` passed (44 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed; `pnpm build` passed. The protected action accepts only `pending_verification`, records admin identity/timestamp/optional note in reservation metadata, and the reservation list exposes pending-payment messaging, amount due, verification metadata, and the confirm action.
    - Notes: Existing status-derived summary, calendar, cancellation, manual-reservation, and availability boundaries already treated `pending_verification` as capacity-consuming and required no payment-table changes. Verification metadata is appended to existing reservation notes to avoid a schema migration. Browser/manual route smoke testing remains part of final T07 validation.
 
-- [ ] T05: `Remove Stripe infrastructure and stale provider artifacts` (status:todo)
+- [x] T05: `Remove Stripe infrastructure and stale provider artifacts` (status:done)
   - Task ID: T05
   - Goal: Complete the full provider removal after the replacement flow is wired.
-  - Boundaries (in/out of scope): In — delete Stripe actions/modules/webhook/status pages and provider-only tests; remove the Stripe package; remove Stripe/old payment environment variables and setup/docs; update imports, scripts, metadata, and route references; retain Resend only for the new notifications. Out — new payment provider integrations and unrelated dependency upgrades.
-  - Done when: Repository-wide search finds no executable Stripe/provider-payment references, `payments` table references, checkout/success/cancel provider flow, or stale Stripe environment contract; the app still has a working `/booking` route and no orphaned imports/routes.
-  - Verification notes (commands or checks): Repository-wide search for `stripe`, `Stripe`, `payments`, `checkout`, and obsolete payment env names; run `pnpm lint`, `pnpm test`, and `pnpm build` after cleanup.
+   - Boundaries (in/out of scope): In — delete Stripe actions/modules/webhook/status pages and provider-only tests; remove the Stripe package; remove Stripe/old payment environment variables and setup/docs; update imports, scripts, metadata, and route references; retain Resend only for the new notifications. Out — new payment provider integrations and unrelated dependency upgrades.
+   - Done when: Repository-wide search finds no executable Stripe/provider-payment references, `payments` table references, checkout/success/cancel provider flow, or stale Stripe environment contract; the app still has a working `/booking` route and no orphaned imports/routes.
+   - Verification notes (commands or checks): Repository-wide search for `stripe`, `Stripe`, `payments`, `checkout`, and obsolete payment env names; run `pnpm lint`, `pnpm test`, and `pnpm build` after cleanup.
+   - Completed: 2026-08-16
+   - Files changed: `.env.example`, `README.md`, `package.json`, `pnpm-lock.yaml`, provider-only app/lib/test files, and `tests/public-booking/reservations.test.ts`
+   - Evidence: Removed the Stripe action, webhook route, provider return pages, checkout/status/webhook modules, and three provider-only tests; removed the `stripe` dependency and stale provider environment/setup documentation; `pnpm exec tsx --test tests/public-booking/*.test.ts` passed (10 tests); `pnpm test` passed (41 tests); `pnpm lint` passed; `pnpm exec tsc --noEmit` passed after clearing stale `.next` generated route types; `pnpm build` passed and generated only `/` and `/booking` public routes plus the protected admin routes. Repository source search found no executable Stripe/provider imports, routes, or obsolete environment variables.
+   - Notes: Historical Drizzle migration metadata retains the legacy `payments` snapshot so migration history remains intact; the current schema and forward migration remove that table and no runtime code references it. Historical completed-plan evidence retains its original provider validation records.
 
 - [ ] T06: `Redesign White Mountains public landing page` (status:todo)
   - Task ID: T06
