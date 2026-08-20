@@ -25,6 +25,12 @@ const reservation: PendingReservationSummary = {
   paymentMethod: 'venmo',
   paymentInstructions: {
     method: 'venmo',
+    profile: {
+      fullName: 'Venmo Owner',
+      handle: '@white-mountains',
+      email: 'venmo@example.test',
+      phone: '5551112222',
+    },
     recipient: '@white-mountains',
     instructions: 'Send $144.00 via Venmo to @white-mountains.',
   },
@@ -42,6 +48,12 @@ describe('manual payment reservation notifications', () => {
   it('builds separate customer and owner messages without confirmation language', () => {
     const instructions: ManualPaymentInstructions = {
       method: 'venmo',
+      profile: {
+        fullName: 'Venmo Owner',
+        handle: '@white-mountains',
+        email: 'venmo@example.test',
+        phone: '5551112222',
+      },
       recipient: '@white-mountains',
       instructions: 'Send $144.00 via Venmo to @white-mountains.',
     }
@@ -55,9 +67,36 @@ describe('manual payment reservation notifications', () => {
     assert.equal(messages.customer.from, 'White Mountains <bookings@example.test>')
     assert.match(messages.customer.text, /PG-TEST-0001/)
     assert.match(messages.customer.text, /\$144\.00/)
+    assert.match(messages.customer.text, /Account name: Venmo Owner/)
+    assert.match(messages.customer.text, /Venmo handle: @white-mountains/)
+    assert.match(messages.customer.text, /Payment email: venmo@example\.test/)
+    assert.match(messages.customer.text, /Payment phone: 5551112222/)
     assert.match(messages.customer.text, /Payment pending manual confirmation/)
     assert.match(messages.owner.text, /Customer phone: \+1 555 123 4567/)
     assert.doesNotMatch(messages.customer.text, /Your reservation is confirmed|payment was confirmed|total paid/i)
+  })
+
+  it('includes only the selected Zelle profile', () => {
+    const zelleInstructions: ManualPaymentInstructions = {
+      method: 'zelle',
+      profile: {
+        fullName: 'Zelle Owner',
+        email: 'zelle@example.test',
+        phone: '5553334444',
+      },
+      recipient: 'zelle@example.test',
+      instructions: 'Send $144.00 via Zelle to zelle@example.test.',
+    }
+    const messages = buildReservationNotificationMessages(reservation, zelleInstructions, {
+      emailFrom: 'White Mountains <bookings@example.test>',
+      ownerNotificationEmail: 'owner@example.test',
+    })
+
+    assert.match(messages.customer.text, /Account name: Zelle Owner/)
+    assert.match(messages.customer.text, /Payment email: zelle@example\.test/)
+    assert.match(messages.customer.text, /Payment phone: 5553334444/)
+    assert.doesNotMatch(messages.customer.text, /Venmo handle|Venmo Owner|venmo@example\.test|5551112222/)
+    assert.doesNotMatch(messages.customer.html, /Venmo handle|Venmo Owner|venmo@example\.test|5551112222/)
   })
 
   it('escapes customer-controlled values in HTML', () => {
@@ -72,5 +111,29 @@ describe('manual payment reservation notifications', () => {
 
     assert.match(messages.customer.html, /&lt;Jane Doe&gt;/)
     assert.doesNotMatch(messages.customer.html, /<Jane Doe>/)
+  })
+
+  it('escapes configured payment profile values in HTML', () => {
+    const hostileInstructions: ManualPaymentInstructions = {
+      method: 'venmo',
+      profile: {
+        fullName: '<img src=x onerror=alert(1)>',
+        handle: '";alert(1);//',
+        email: "pay<'@example.test",
+        phone: '<script>alert(1)</script>',
+      },
+      recipient: '<venmo-recipient>',
+      instructions: 'Pay <exactly> and include "the reference".',
+    }
+    const messages = buildReservationNotificationMessages(reservation, hostileInstructions, {
+      emailFrom: 'White Mountains <bookings@example.test>',
+      ownerNotificationEmail: 'owner@example.test',
+    })
+
+    assert.match(messages.customer.html, /&lt;img src=x onerror=alert\(1\)&gt;/)
+    assert.match(messages.customer.html, /&quot;;alert\(1\);\/\//)
+    assert.match(messages.customer.html, /pay&lt;&#39;@example\.test/)
+    assert.match(messages.customer.html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/)
+    assert.doesNotMatch(messages.customer.html, /<img|<script>/)
   })
 })

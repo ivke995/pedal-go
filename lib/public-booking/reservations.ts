@@ -35,15 +35,23 @@ export type PendingReservationFieldErrors = {
   paymentMethod?: string
 }
 
+export type ManualPaymentProfile = {
+  fullName: string
+  email: string
+  phone: string
+  handle?: string
+}
+
 export type ManualPaymentConfiguration = {
-  venmoHandle: string
-  zelleRecipient: string
+  venmo: ManualPaymentProfile & { handle: string }
+  zelle: ManualPaymentProfile & { handle?: never }
   ownerNotificationEmail: string
   emailFrom: string
 }
 
 export type ManualPaymentInstructions = {
   method: PaymentMethod
+  profile: ManualPaymentProfile
   recipient: string
   instructions: string
 }
@@ -117,10 +125,33 @@ function getRequiredConfiguration(name: string): string {
 
 export function getManualPaymentConfiguration(): ManualPaymentConfiguration {
   return {
-    venmoHandle: getRequiredConfiguration('VENMO_HANDLE'),
-    zelleRecipient: getRequiredConfiguration('ZELLE_RECIPIENT'),
+    venmo: {
+      fullName: getRequiredConfiguration('VENMO_NAME'),
+      handle: getRequiredConfiguration('VENMO_HANDLE'),
+      email: getRequiredConfiguration('VENMO_EMAIL'),
+      phone: getRequiredConfiguration('VENMO_PHONE'),
+    },
+    zelle: {
+      fullName: getRequiredConfiguration('ZELLE_NAME'),
+      email: getRequiredConfiguration('ZELLE_EMAIL'),
+      phone: getRequiredConfiguration('ZELLE_PHONE'),
+    },
     ownerNotificationEmail: getRequiredConfiguration('OWNER_NOTIFICATION_EMAIL'),
     emailFrom: getRequiredConfiguration('EMAIL_FROM'),
+  }
+}
+
+function validateManualPaymentConfiguration(configuration: ManualPaymentConfiguration): void {
+  const profiles = [configuration.venmo, configuration.zelle]
+
+  for (const profile of profiles) {
+    if (!profile || !profile.fullName.trim() || !EMAIL_RE.test(profile.email.trim()) || !profile.phone.trim()) {
+      throw new Error('Manual payment profile configuration is incomplete.')
+    }
+  }
+
+  if (!configuration.venmo.handle?.trim()) {
+    throw new Error('Manual payment profile configuration is incomplete.')
   }
 }
 
@@ -135,11 +166,13 @@ function getPaymentInstructions(
   configuration: ManualPaymentConfiguration,
 ): ManualPaymentInstructions {
   const amount = formatUsdCents(totalUsdCents)
-  const recipient = paymentMethod === 'venmo' ? configuration.venmoHandle : configuration.zelleRecipient
+  const profile = paymentMethod === 'venmo' ? configuration.venmo : configuration.zelle
+  const recipient = paymentMethod === 'venmo' ? configuration.venmo.handle : configuration.zelle.email
   const methodLabel = paymentMethod === 'venmo' ? 'Venmo' : 'Zelle'
 
   return {
     method: paymentMethod,
+    profile,
     recipient,
     instructions: `Send ${amount} via ${methodLabel} to ${recipient}. Include reservation ${reference} in the payment note. Payment remains pending manual confirmation until the owner verifies the transaction.`,
   }
@@ -232,6 +265,7 @@ export async function createPendingReservation(
 
   try {
     paymentConfiguration = options.paymentConfig ?? getManualPaymentConfiguration()
+    validateManualPaymentConfiguration(paymentConfiguration)
     emailSender = options.emailSender ?? createResendReservationEmailSender()
   } catch (error) {
     console.error('Manual payment reservation configuration is incomplete', error)

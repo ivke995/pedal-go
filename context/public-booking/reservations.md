@@ -10,15 +10,18 @@
   started-24-hour rental-day rule.
 - New public reservations use status `pending_verification`, assign the first available physical bike when possible, and
   write hold strategy/expiry metadata into `notes`.
-- Public submission validates `venmo` or `zelle`, persists the selected method, and returns only that method's recipient
-  and exact-amount instructions in the UI-safe summary.
+- Public submission validates `venmo` or `zelle`, validates the complete server-configured profiles, persists the selected
+  method, and returns only that method's typed profile, derived recipient, and exact-amount instructions in the UI-safe
+  summary.
 - Submission sends customer and owner reservation-received notifications through the server-side Resend boundary. The
   owner recipient and sender configuration are never included in the public result.
 - Missing payment configuration fails before insert. A post-insert email failure reports `notification_error` while the
   saved reservation remains `pending_verification`.
 - Pending-verification reservations block availability just like confirmed reservations.
 - The active `/booking` UI calls the reservation action only after customer details and a Venmo/Zelle method are selected;
-  successful results render the reference, exact amount, selected instructions, and manual-confirmation next steps.
+  successful results render the reference, exact amount, selected profile details, selected instructions, and
+  manual-confirmation next steps. Reservation-received customer and owner emails render the same selected profile
+  details; HTML email values are escaped and Zelle omits the Venmo handle.
 
 ## Related code
 

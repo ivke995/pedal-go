@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import { availabilityBlocks, bikes, bikeTypes, reservations } from '@/lib/db/schema'
-import { createPendingReservation } from '@/lib/public-booking/reservations'
+import { createPendingReservation, getManualPaymentConfiguration } from '@/lib/public-booking/reservations'
 
 process.env.TURSO_DATABASE_URL ??= 'file::memory:'
 
@@ -39,8 +39,17 @@ const validInput = {
 }
 
 const paymentConfig = {
-  venmoHandle: '@white-mountains',
-    zelleRecipient: 'zelle@example.test',
+  venmo: {
+    fullName: 'Venmo Owner',
+    handle: '@white-mountains',
+    email: 'venmo@example.test',
+    phone: '5551112222',
+  },
+  zelle: {
+    fullName: 'Zelle Owner',
+    email: 'zelle@example.test',
+    phone: '5553334444',
+  },
   ownerNotificationEmail: 'owner@example.test',
   emailFrom: 'White Mountains <bookings@example.test>',
 }
@@ -149,7 +158,17 @@ describe('public booking pending reservation', () => {
 
   it('fails safely without payment configuration and does not insert', async () => {
     const database = fakeDatabase({ bikeType, bikeRows: [bike('bike-1')] })
-    const names = ['VENMO_HANDLE', 'ZELLE_RECIPIENT', 'OWNER_NOTIFICATION_EMAIL', 'EMAIL_FROM']
+    const names = [
+      'VENMO_NAME',
+      'VENMO_HANDLE',
+      'VENMO_EMAIL',
+      'VENMO_PHONE',
+      'ZELLE_NAME',
+      'ZELLE_EMAIL',
+      'ZELLE_PHONE',
+      'OWNER_NOTIFICATION_EMAIL',
+      'EMAIL_FROM',
+    ]
     const previous = Object.fromEntries(names.map((name) => [name, process.env[name]]))
 
     try {
@@ -168,6 +187,92 @@ describe('public booking pending reservation', () => {
         else process.env[name] = previous[name]
       }
     }
+  })
+
+  it('loads complete typed Venmo and Zelle profiles from server configuration', () => {
+    const names = [
+      'VENMO_NAME',
+      'VENMO_HANDLE',
+      'VENMO_EMAIL',
+      'VENMO_PHONE',
+      'ZELLE_NAME',
+      'ZELLE_EMAIL',
+      'ZELLE_PHONE',
+      'OWNER_NOTIFICATION_EMAIL',
+      'EMAIL_FROM',
+    ]
+    const previous = Object.fromEntries(names.map((name) => [name, process.env[name]]))
+
+    try {
+      process.env.VENMO_NAME = 'Radomir Kalkan'
+      process.env.VENMO_HANDLE = '@Radomir-Kalkan'
+      process.env.VENMO_EMAIL = 'Kalkanradomir@gmail.com'
+      process.env.VENMO_PHONE = '6033481320'
+      process.env.ZELLE_NAME = 'Radomir Kalkan'
+      process.env.ZELLE_EMAIL = 'Kalkanradomir@gmail.com'
+      process.env.ZELLE_PHONE = '6033481320'
+      process.env.OWNER_NOTIFICATION_EMAIL = 'owner@example.test'
+      process.env.EMAIL_FROM = 'White Mountains <bookings@example.test>'
+
+      assert.deepEqual(getManualPaymentConfiguration(), {
+        venmo: {
+          fullName: 'Radomir Kalkan',
+          handle: '@Radomir-Kalkan',
+          email: 'Kalkanradomir@gmail.com',
+          phone: '6033481320',
+        },
+        zelle: {
+          fullName: 'Radomir Kalkan',
+          email: 'Kalkanradomir@gmail.com',
+          phone: '6033481320',
+        },
+        ownerNotificationEmail: 'owner@example.test',
+        emailFrom: 'White Mountains <bookings@example.test>',
+      })
+    } finally {
+      for (const name of names) {
+        if (previous[name] === undefined) delete process.env[name]
+        else process.env[name] = previous[name]
+      }
+    }
+  })
+
+  it('returns only the selected Venmo profile in the public summary', async () => {
+    const database = fakeDatabase({ bikeType, bikeRows: [bike('bike-1')] })
+    const result = await createPendingReservation(validInput, database as never, testOptions())
+
+    assert.equal(result.status, 'created')
+    assert.deepEqual(result.reservation.paymentInstructions.profile, paymentConfig.venmo)
+    assert.equal('zelle' in result.reservation.paymentInstructions, false)
+  })
+
+  it('returns only the selected Zelle profile in the public summary', async () => {
+    const database = fakeDatabase({ bikeType, bikeRows: [bike('bike-1')] })
+    const result = await createPendingReservation(
+      { ...validInput, paymentMethod: 'zelle' },
+      database as never,
+      testOptions(),
+    )
+
+    assert.equal(result.status, 'created')
+    assert.deepEqual(result.reservation.paymentInstructions.profile, paymentConfig.zelle)
+    assert.equal('venmo' in result.reservation.paymentInstructions, false)
+  })
+
+  it('fails safely for an incomplete selected payment profile and does not insert', async () => {
+    const database = fakeDatabase({ bikeType, bikeRows: [bike('bike-1')] })
+
+    const result = await createPendingReservation(validInput, database as never, {
+      ...testOptions(),
+      paymentConfig: {
+        ...paymentConfig,
+        venmo: { ...paymentConfig.venmo, phone: ' ' },
+      },
+    })
+
+    assert.equal(result.status, 'error')
+    assert.match(result.message, /not configured/i)
+    assert.equal(database.insertedRows.length, 0)
   })
 
   it('creates a pending reservation with customer, price, bike hold, and expiry metadata', async () => {
@@ -191,6 +296,7 @@ describe('public booking pending reservation', () => {
     assert.equal(result.reservation.totalUsdCents, 14400)
     assert.equal(result.reservation.paymentMethod, 'venmo')
     assert.equal(result.reservation.paymentInstructions.recipient, '@white-mountains')
+    assert.deepEqual(result.reservation.paymentInstructions.profile, paymentConfig.venmo)
     assert.match(result.reservation.paymentInstructions.instructions, /\$144\.00/)
     assert.equal(result.reservation.holdExpiresAt, '2026-07-14T09:30:00.000Z')
     assert.equal(database.insertedRows.length, 1)

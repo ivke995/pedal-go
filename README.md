@@ -12,8 +12,13 @@ Keep real values in `.env.local` for local development or in your deployment pla
 | --- | --- | --- |
 | `TURSO_DATABASE_URL` | Always, for app runtime and database commands | libSQL connection URL. Use `file:./local.db` for local development or a Turso/libSQL URL when deployed. |
 | `TURSO_AUTH_TOKEN` | Remote Turso/libSQL URLs | Database auth token. Omit for local `file:` URLs. |
-| `VENMO_HANDLE` | Public reservations | Server-only Venmo recipient used to build selected-method instructions. |
-| `ZELLE_RECIPIENT` | Public reservations | Server-only Zelle recipient used to build selected-method instructions. |
+| `VENMO_NAME` | Public reservations | Server-only full name shown for the selected Venmo payment profile. |
+| `VENMO_HANDLE` | Public reservations | Server-only Venmo handle shown for the selected payment profile. |
+| `VENMO_EMAIL` | Public reservations | Server-only email shown for the selected Venmo payment profile. |
+| `VENMO_PHONE` | Public reservations | Server-only phone shown for the selected Venmo payment profile. |
+| `ZELLE_NAME` | Public reservations | Server-only full name shown for the selected Zelle payment profile. |
+| `ZELLE_EMAIL` | Public reservations | Server-only email shown for the selected Zelle payment profile. |
+| `ZELLE_PHONE` | Public reservations | Server-only phone shown for the selected Zelle payment profile. |
 | `OWNER_NOTIFICATION_EMAIL` | Public reservations | Server-only destination for owner reservation-received notifications. |
 | `EMAIL_FROM` | Public reservations | Server-only verified sender identity used for customer and owner notifications. |
 | `RESEND_API_KEY` | Public reservations | Server-only Resend API key used to send reservation-received notifications. |
@@ -29,8 +34,13 @@ Keep real values in `.env.local` for local development or in your deployment pla
 
    ```dotenv
    TURSO_DATABASE_URL=file:./local.db
+   VENMO_NAME=replace-with-venmo-full-name
    VENMO_HANDLE=@replace-with-venmo-handle
-   ZELLE_RECIPIENT=replace-with-zelle-recipient
+   VENMO_EMAIL=venmo@example.com
+   VENMO_PHONE=replace-with-venmo-phone
+   ZELLE_NAME=replace-with-zelle-full-name
+   ZELLE_EMAIL=zelle@example.com
+   ZELLE_PHONE=replace-with-zelle-phone
    OWNER_NOTIFICATION_EMAIL=owner@example.com
    EMAIL_FROM="White Mountains Bike Rentals <verified-sender@example.com>"
    RESEND_API_KEY=re_placeholder
@@ -72,7 +82,8 @@ Seed data is idempotent and creates:
 ### Manual payment and email setup
 
 - Public reservations use the centralized $48/day rate and remain `pending_verification` after submission.
-- Customers choose Venmo or Zelle. Only the selected method's recipient and exact-amount instructions are returned to the customer.
+- Customers choose Venmo or Zelle. Only the selected method's complete profile and exact-amount instructions are returned to the customer. Venmo requires full name, handle, email, and phone; Zelle requires full name, email, and phone and has no handle.
+- Configure the same payment-account full name, email, and phone in both profiles when they belong to the same account owner; configure the Venmo handle only in `VENMO_HANDLE`.
 - `OWNER_NOTIFICATION_EMAIL`, `EMAIL_FROM`, and `RESEND_API_KEY` remain server-only. Missing manual-payment or email configuration fails before a reservation is inserted.
 - Resend sends customer and owner reservation-received notifications immediately after insertion. Notification failure leaves the saved reservation pending manual confirmation.
 - An authenticated admin must independently verify an external payment before moving a reservation to `confirmed`.
@@ -83,5 +94,5 @@ Seed data is idempotent and creates:
 - Apply migrations to the target Turso/libSQL database with `pnpm db:migrate`.
 - Run `pnpm db:seed` once with a strong `ADMIN_BOOTSTRAP_PASSWORD` to create the MVP inventory and bootstrap admin.
 - Verify the `EMAIL_FROM` sender/domain in Resend and configure the owner notification recipient.
-- Confirm Venmo/Zelle recipients before enabling real public submissions.
+- Confirm the complete Venmo/Zelle profiles before enabling real public submissions: full name, email, and phone for both methods, plus the Venmo handle.
 - Run `pnpm lint`, `pnpm test`, and `pnpm build` before release.

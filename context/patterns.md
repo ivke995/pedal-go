@@ -23,7 +23,7 @@
 - Keep client-safe USD display formatting helpers in `lib/pricing.ts`; database-backed booking paths use server-side pricing from `lib/domain/pricing.ts`.
 - Keep server-side database-backed rental pricing and availability logic in `lib/domain/`; do not import those helpers into client components when they pull in database access.
 - Keep public booking orchestration in `lib/public-booking/`; client components should call server actions rather than importing database-backed domain helpers directly.
-- Keep the manual-payment submission boundary server-side in `lib/public-booking/`; validate Venmo/Zelle there, return only the selected method's recipient/instructions and exact amount, and keep `EMAIL_FROM`, `OWNER_NOTIFICATION_EMAIL`, `RESEND_API_KEY`, and the unselected payment configuration out of client results.
+- Keep the manual-payment submission boundary server-side in `lib/public-booking/`; validate Venmo/Zelle and complete typed profiles there, return only the selected method's profile plus recipient/instructions and exact amount, and keep `EMAIL_FROM`, `OWNER_NOTIFICATION_EMAIL`, `RESEND_API_KEY`, and the unselected payment configuration out of client results.
 - `pending_verification` is an unpaid/manual-review state. No client redirect, provider webhook, or customer claim may transition it to `confirmed`.
 - Provider integrations are not part of the current public booking boundary. Manual Venmo/Zelle instructions and owner verification are the only payment-related paths.
 - Keep admin authentication server-only in `lib/admin-auth/`; admin route groups under `app/admin/(dashboard)/` should use the protected layout rather than client-side access checks.

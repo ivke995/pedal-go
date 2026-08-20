@@ -65,6 +65,10 @@ function buildRows(
     ['Amount due', formatUsdCents(reservation.totalUsdCents)],
     ['Payment method', methodLabel(instructions)],
     ['Payment recipient', instructions.recipient],
+    ['Account name', instructions.profile.fullName],
+    ...(instructions.profile.handle ? [['Venmo handle', instructions.profile.handle] as [string, string]] : []),
+    ['Payment email', instructions.profile.email],
+    ['Payment phone', instructions.profile.phone],
     ['Payment instructions', instructions.instructions],
   ]
 }

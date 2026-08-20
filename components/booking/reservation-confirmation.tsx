@@ -17,6 +17,7 @@ export function ReservationConfirmation({
   notificationMessage,
 }: ReservationConfirmationProps) {
   const paymentMethod = reservation.paymentInstructions.method === 'venmo' ? 'Venmo' : 'Zelle'
+  const paymentProfile = reservation.paymentInstructions.profile
   const total = formatCurrency(reservation.totalUsdCents / 100)
 
   return (
@@ -88,6 +89,26 @@ export function ReservationConfirmation({
         <p className="mt-4 break-words rounded-lg bg-background p-3 text-sm font-semibold">
           {reservation.paymentInstructions.recipient}
         </p>
+        <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2 sm:gap-x-6">
+          <div>
+            <dt className="text-muted-foreground">Account name</dt>
+            <dd className="break-words font-medium">{paymentProfile.fullName}</dd>
+          </div>
+          {paymentProfile.handle ? (
+            <div>
+              <dt className="text-muted-foreground">Venmo handle</dt>
+              <dd className="break-words font-medium">{paymentProfile.handle}</dd>
+            </div>
+          ) : null}
+          <div>
+            <dt className="text-muted-foreground">Payment email</dt>
+            <dd className="break-all font-medium">{paymentProfile.email}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Payment phone</dt>
+            <dd className="break-words font-medium">{paymentProfile.phone}</dd>
+          </div>
+        </dl>
         <p className="mt-3 text-sm leading-relaxed text-foreground">
           {reservation.paymentInstructions.instructions}
         </p>
